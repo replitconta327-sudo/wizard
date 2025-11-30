@@ -28,7 +28,8 @@ try {
 
     $status_list = $pdo->query("SELECT id, nome FROM status_pedido ORDER BY ordem")->fetchAll(PDO::FETCH_ASSOC);
     
-    $usuario = $pdo->query("SELECT nome FROM usuarios WHERE id = " . $_SESSION['usuario_id'])->fetch(PDO::FETCH_ASSOC);
+    $usuario_result = $pdo->query("SELECT nome FROM usuarios WHERE id = " . $_SESSION['usuario_id'])->fetch(PDO::FETCH_ASSOC);
+    $usuario = $usuario_result ?: ['nome' => 'Admin'];
     
     $total_pedidos = count($pedidos);
     $total_clientes = count($clientes);
