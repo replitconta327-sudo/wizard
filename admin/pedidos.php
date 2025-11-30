@@ -105,6 +105,54 @@ try {
             flex: 1;
         }
 
+        .notification-banner {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: slideDown 0.3s ease-in;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .notification-banner.show {
+            display: flex;
+        }
+
+        .notification-content h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .notification-content p {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+
+        .btn-close-notif {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-close-notif:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -294,7 +342,12 @@ try {
             color: #6b7280;
         }
 
-        .btn-detalhes {
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-detalhes, .btn-imprimir {
             padding: 0.4rem 0.8rem;
             background: #DC2626;
             color: white;
@@ -307,8 +360,16 @@ try {
             font-weight: 600;
         }
 
+        .btn-imprimir {
+            background: #3B82F6;
+        }
+
         .btn-detalhes:hover {
             background: #B91C1C;
+        }
+
+        .btn-imprimir:hover {
+            background: #2563EB;
         }
 
         @media (max-width: 1024px) {
@@ -325,6 +386,44 @@ try {
                 font-size: 0.8rem;
             }
         }
+
+        @media print {
+            body * { display: none; }
+            .comanda-print { display: block !important; }
+        }
+
+        .comanda-print {
+            display: none;
+            background: white;
+            padding: 20px;
+            font-family: monospace;
+            width: 80mm;
+            margin: 0 auto;
+        }
+
+        .comanda-header {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .comanda-divider {
+            border-top: 1px dashed #000;
+            margin: 10px 0;
+        }
+
+        .comanda-item {
+            font-size: 12px;
+            line-height: 1.4;
+            margin: 8px 0;
+        }
+
+        .comanda-footer {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 11px;
+        }
     </style>
 </head>
 <body>
@@ -340,6 +439,15 @@ try {
 
         <!-- MAIN CONTENT -->
         <div class="admin-main">
+            <!-- NOTIFICAÇÃO DE NOVO PEDIDO -->
+            <div id="notification" class="notification-banner">
+                <div class="notification-content">
+                    <h3>Novo Pedido Recebido!</h3>
+                    <p id="notif-texto">Você tem um novo pedido para preparar</p>
+                </div>
+                <button class="btn-close-notif" onclick="this.parentElement.classList.remove('show')">Fechar</button>
+            </div>
+
             <!-- DASHBOARD ESTATÍSTICAS -->
             <div class="stats-grid">
                 <div class="stat-card">
@@ -390,12 +498,12 @@ try {
                                     <th>Total</th>
                                     <th>Rastreamento</th>
                                     <th>Data</th>
-                                    <th>Ação</th>
+                                    <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($pedidos as $p): ?>
-                                    <tr class="pedido-row" data-cliente="<?php echo strtolower($p['cliente_nome']); ?>" data-status="<?php echo strtolower($p['status_nome']); ?>">
+                                    <tr class="pedido-row" data-cliente="<?php echo strtolower($p['cliente_nome']); ?>" data-status="<?php echo strtolower($p['status_nome']); ?>" data-pedido-id="<?php echo $p['id']; ?>">
                                         <td class="pedido-numero">#<?php echo substr($p['numero_pedido'], -6); ?></td>
                                         <td class="cliente-nome"><?php echo htmlspecialchars($p['cliente_nome'] ?? 'N/A'); ?></td>
                                         <td><small><?php echo htmlspecialchars($p['telefone'] ?? '-'); ?></small></td>
@@ -413,7 +521,12 @@ try {
                                             </select>
                                         </td>
                                         <td><small><?php echo date('d/m/Y H:i', strtotime($p['criado_em'])); ?></small></td>
-                                        <td><a href="pedido_detalhes.php?id=<?php echo $p['id']; ?>" class="btn-detalhes">Ver</a></td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <a href="pedido_detalhes.php?id=<?php echo $p['id']; ?>" class="btn-detalhes">Ver</a>
+                                                <button class="btn-imprimir" onclick="imprimirComanda(<?php echo $p['id']; ?>, '<?php echo htmlspecialchars($p['cliente_nome']); ?>', '<?php echo htmlspecialchars($p['numero_pedido']); ?>', '<?php echo htmlspecialchars($p['telefone']); ?>', 'R$ <?php echo number_format($p['total'], 2, ',', '.'); ?>')">Imprimir</button>
+                                            </div>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -462,6 +575,8 @@ try {
     </div>
 
     <script>
+        let ultimoPedidoID = <?php echo count($pedidos) > 0 ? max(array_column($pedidos, 'id')) : 0; ?>;
+
         function showTab(tab) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -482,26 +597,44 @@ try {
             });
         }
 
-        document.getElementById('search-pedido')?.addEventListener('keyup', function() {
-            const search = this.value.toLowerCase();
-            document.querySelectorAll('.pedido-row').forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(search) ? '' : 'none';
-            });
-        });
+        function imprimirComanda(id, cliente, numeroPedido, telefone, total) {
+            const comanda = `
+                <div style="text-align: center; font-family: monospace; width: 80mm; margin: 0; padding: 20px;">
+                    <div style="font-size: 14px; font-weight: bold; margin-bottom: 15px;">PIZZARIA SÃO PAULO</div>
+                    <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+                    <div style="font-size: 12px; margin: 8px 0;"><strong>PEDIDO:</strong> ${numeroPedido}</div>
+                    <div style="font-size: 12px; margin: 8px 0;"><strong>CLIENTE:</strong> ${cliente}</div>
+                    <div style="font-size: 12px; margin: 8px 0;"><strong>TELEFONE:</strong> ${telefone}</div>
+                    <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+                    <div style="font-size: 12px; margin: 8px 0;"><strong>TOTAL:</strong> ${total}</div>
+                    <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+                    <div style="font-size: 11px; margin-top: 15px;">${new Date().toLocaleString('pt-BR')}</div>
+                    <div style="font-size: 11px; margin-top: 5px;">OBRIGADO!</div>
+                </div>
+            `;
+            
+            const printWindow = window.open('', '', 'width=300,height=400');
+            printWindow.document.write('<html><head><title>Comanda</title></head><body>');
+            printWindow.document.write(comanda);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            setTimeout(() => printWindow.print(), 100);
+        }
 
-        document.getElementById('filter-status')?.addEventListener('change', function() {
-            const status = this.value.toLowerCase();
-            document.querySelectorAll('.pedido-row').forEach(row => {
-                row.style.display = !status || row.dataset.status.includes(status) ? '' : 'none';
-            });
-        });
+        function verificarNovosPedidos() {
+            fetch('../api/verificar_pedidos.php?ultimo_id=' + ultimoPedidoID)
+                .then(r => r.json())
+                .then(d => {
+                    if (d.novo_pedido) {
+                        ultimoPedidoID = d.id;
+                        document.getElementById('notif-texto').innerText = `Novo pedido de ${d.cliente} - ${d.numero_pedido}`;
+                        document.getElementById('notification').classList.add('show');
+                        setTimeout(() => location.reload(), 5000);
+                    }
+                });
+        }
 
-        document.getElementById('search-cliente')?.addEventListener('keyup', function() {
-            const search = this.value.toLowerCase();
-            document.querySelectorAll('.cliente-row').forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(search) ? '' : 'none';
-            });
-        });
+        setInterval(verificarNovosPedidos, 5000);
     </script>
 </body>
 </html>

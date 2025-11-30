@@ -1,7 +1,7 @@
 # Pizzaria São Paulo - Sistema de Pedidos Online
 
 ## Visão Geral
-Sistema completo de pedidos de pizza com fluxo wizard mobile (8 passos) e painel admin para gerenciamento. 
+Sistema completo de pedidos de pizza com fluxo wizard mobile (8 passos) e painel admin para gerenciamento com notificações e impressão de comanda. 
 
 **Stack:** PHP 8.2 + SQLite + JavaScript puro (vanilla)
 
@@ -32,33 +32,47 @@ Sistema completo de pedidos de pizza com fluxo wizard mobile (8 passos) e painel
 ### 👨‍💼 Admin - Painel Completo
 **Localização:** `/admin/pedidos.php`
 
-**Design:** Segue padrão do cliente com cores vermelhas (#DC2626) e logo da marca
+**Design:** Sidebar vermelho + cards brancos, interface clean e profissional
 
 #### Funcionalidades:
-1. **Dashboard com Estatísticas**
+1. **Notificação em Tempo Real**
+   - Banner verde automático quando novo pedido chega
+   - Mostra cliente e número do pedido
+   - Atualiza a cada 5 segundos
+   - Auto-recarrega quando há novo pedido
+
+2. **Dashboard com Estatísticas**
    - Total de pedidos
    - Total de clientes
    - Faturamento total
    - Pedidos de hoje
 
-2. **Aba Pedidos**
-   - Lista de todos os pedidos
-   - Rastreamento com badge de status (Novo/Confirmado/Entregue/Cancelado)
+3. **Aba Pedidos**
+   - Lista completa com todas as informações
+   - Rastreamento com badge de status
    - Dropdown para mudar status em tempo real
+   - Botão **Imprimir Comanda** (formatada 80mm para impressora térmica)
    - Busca por número ou cliente
    - Filtro por status
    - Link para detalhes completo
-   - Data e hora de cada pedido
 
-3. **Aba Clientes**
+4. **Aba Clientes**
    - Lista de clientes cadastrados
    - Busca por nome
    - Dados: Nome, Telefone, Email, Data Cadastro
    - Contagem de pedidos por cliente
 
+### 🖨️ Impressão de Comanda
+- Botão "Imprimir" em azul em cada pedido
+- Formato otimizado para impressora térmica 80mm
+- Inclui: número pedido, cliente, telefone, total
+- Data e hora do pedido
+- Mensagem de agradecimento
+
 ### 📱 APIs
 - `POST /api/criar_pedido.php` - Cria novo pedido no banco
 - `POST /api/atualizar_status.php` - Atualiza status do pedido
+- `GET /api/verificar_pedidos.php` - Verifica novos pedidos em tempo real
 - `GET /api/enderecos.php?action=list` - Lista endereços do usuário
 - `POST /api/enderecos.php?action=add` - Cadastra novo endereço
 - `GET /api/get_tamanhos.php` - Lista tamanhos
@@ -92,7 +106,8 @@ Tabelas principais:
 - Admin requer autenticação (session)
 - Todos os totais: pizzas + adicionais + bebidas + taxa entrega
 - Rastreamento de status em tempo real
-- Interface admin com padrão visual consistente
+- Notificação automática de novo pedido
+- Impressão de comanda formatada para 80mm
 
 ### 📂 Estrutura
 ```
@@ -102,10 +117,11 @@ Tabelas principais:
   /css/style.css             → Estilos principais com design system
   /js/pages/cardapio.js      → Lógica do wizard
 /admin/
-  /pedidos.php               → Dashboard e rastreamento
+  /pedidos.php               → Dashboard com notificação e impressão
 /api/
   /criar_pedido.php          → Salva novo pedido
   /atualizar_status.php      → Atualiza status do pedido
+  /verificar_pedidos.php     → Verifica novos pedidos em tempo real
   /enderecos.php             → CRUD endereços
   /get_tamanhos.php          → Lista tamanhos
 /config/
@@ -116,7 +132,8 @@ Tabelas principais:
 ## Design System
 - **Cor Primária:** Vermelho #DC2626 (pizza)
 - **Cor Secundária:** Laranja #F59E0B (queijo)
-- **Cor de Sucesso:** Verde #10B981 (entregue)
+- **Cor de Sucesso:** Verde #10B981 (entregue/notificação)
+- **Cor Info:** Azul #3B82F6 (ações)
 - **Tipografia:** Inter sans-serif
 - **Espaçamento:** Escala modular (4px base)
 - **Sombras:** Sutis para profundidade
@@ -127,13 +144,15 @@ Tabelas principais:
 
 ## Próximas Melhorias (Opcionais)
 - [ ] Autenticação admin com login seguro
+- [ ] Som de notificação para novo pedido
 - [ ] Relatórios de vendas por período
 - [ ] Sistema de promoções/cupons
 - [ ] Notificações por email/SMS
 - [ ] API pública para integração
 - [ ] Modo escuro
 - [ ] Exportar pedidos em PDF
+- [ ] Histórico de pedidos do cliente
 
 ---
-**Última atualização:** 30/11/2025 - Painel Admin com Rastreamento e Design Unificado
+**Última atualização:** 30/11/2025 - Notificação de novo pedido e impressão de comanda implementadas
 
