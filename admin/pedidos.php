@@ -43,173 +43,54 @@ try {
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Painel Admin - Pizzaria São Paulo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gerenciar Pedidos - Pizzaria</title>
     <link href="../assets/css/style.css" rel="stylesheet">
     <style>
         * { box-sizing: border-box; }
-        html, body { margin: 0; padding: 0; }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: #f5f5f5;
-            width: 100%;
-            overflow-x: hidden;
-        }
+        html, body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: #ffffff; }
 
-        .admin-header {
-            background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
-            padding: 2rem 1.5rem;
-            text-align: center;
+        .header {
+            background: #000000;
             color: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+            border-bottom: 3px solid #ffffff;
         }
 
-        .logo-admin {
-            width: 80px;
-            height: 80px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            margin: 0 auto 1rem;
-        }
-
-        .logo-admin img {
-            width: 70px;
-            height: 70px;
-        }
-
-        .admin-header h1 {
-            margin: 0 0 0.3rem 0;
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-
-        .admin-header p {
-            margin: 0;
-            font-size: 0.95rem;
-            opacity: 0.95;
-        }
-
-        .admin-container {
+        .header-content {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem 1.5rem;
-        }
-
-        .notification-banner {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            animation: slideDown 0.3s ease-in;
-            gap: 1rem;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .notification-banner.show {
             display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .notification-content h3 {
-            margin: 0 0 0.5rem 0;
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-
-        .notification-content p {
+        .header h1 {
             margin: 0;
-            font-size: 0.9rem;
-            opacity: 0.95;
-        }
-
-        .btn-close-notif {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .btn-close-notif:hover {
-            background: rgba(255,255,255,0.3);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-            grid-auto-rows: auto;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.8rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            border-left: 6px solid #DC2626;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-        }
-
-        .stat-card.grande {
-            grid-column: span 2;
-            padding: 2.5rem;
-        }
-
-        .stat-card.pequeño {
-            padding: 1.2rem;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 0.95rem;
-            margin-bottom: 1rem;
-            font-weight: 500;
-        }
-
-        .stat-value {
             font-size: 2rem;
             font-weight: 700;
-            color: #DC2626;
         }
 
-        .stat-card.pequeño .stat-value {
-            font-size: 1.5rem;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
         }
 
         .tabs {
             display: flex;
             gap: 1rem;
             margin-bottom: 2rem;
-            align-items: center;
             flex-wrap: wrap;
         }
 
         .tab-btn {
             padding: 0.8rem 1.5rem;
-            background: #DC2626;
+            background: #000000;
             color: white;
-            border: none;
-            border-radius: 6px;
+            border: 2px solid #000000;
+            border-radius: 4px;
             cursor: pointer;
             font-weight: 600;
             font-size: 0.95rem;
@@ -218,8 +99,7 @@ try {
 
         .tab-btn:not(.active) {
             background: white;
-            color: #111;
-            border: 2px solid #e5e7eb;
+            color: #000000;
         }
 
         .tab-btn:hover {
@@ -230,19 +110,18 @@ try {
             margin-left: auto;
             padding: 0.8rem 1.5rem;
             background: white;
-            color: #DC2626;
-            border: 2px solid #DC2626;
-            border-radius: 6px;
+            color: #000000;
+            border: 2px solid #000000;
+            border-radius: 4px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.95rem;
             text-decoration: none;
             display: inline-block;
             transition: all 0.2s;
         }
 
         .btn-voltar:hover {
-            background: #DC2626;
+            background: #000000;
             color: white;
         }
 
@@ -260,16 +139,16 @@ try {
             margin-bottom: 2rem;
             background: white;
             padding: 1.5rem;
+            border: 2px solid #000000;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             flex-wrap: wrap;
         }
 
         .filters input,
         .filters select {
             padding: 0.7rem 1.2rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
+            border: 2px solid #000000;
+            border-radius: 4px;
             font-size: 1rem;
             font-family: inherit;
             flex: 1;
@@ -280,15 +159,14 @@ try {
         .filters input:focus,
         .filters select:focus {
             outline: none;
-            border-color: #DC2626;
-            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
         }
 
         .table-section {
             background: white;
             border-radius: 8px;
             overflow-x: auto;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 2px solid #000000;
         }
 
         .data-table {
@@ -298,12 +176,12 @@ try {
         }
 
         .data-table th {
-            background: #f9fafb;
+            background: #f0f0f0;
             padding: 1.2rem;
             text-align: left;
             font-weight: 600;
-            color: #374151;
-            border-bottom: 1px solid #e5e7eb;
+            color: #000000;
+            border-bottom: 2px solid #000000;
         }
 
         .data-table td {
@@ -317,18 +195,17 @@ try {
 
         .pedido-numero {
             font-weight: 700;
-            color: #DC2626;
-            min-width: 100px;
+            color: #000000;
         }
 
         .pedido-total {
             font-weight: 600;
-            color: #10B981;
+            color: #000000;
         }
 
         .cliente-nome {
             font-weight: 600;
-            color: #111827;
+            color: #000000;
         }
 
         .status-badge {
@@ -337,17 +214,13 @@ try {
             border-radius: 4px;
             font-size: 0.85rem;
             font-weight: 600;
-            margin-right: 0.5rem;
+            background: #e5e7eb;
+            color: #000000;
         }
-
-        .status-badge.novo { background: #FEF3C7; color: #92400E; }
-        .status-badge.confirmado { background: #DBEAFE; color: #1E40AF; }
-        .status-badge.entregue { background: #D1FAE5; color: #065F46; }
-        .status-badge.cancelado { background: #FEE2E2; color: #7F1D1D; }
 
         .status-select {
             padding: 0.5rem 0.8rem;
-            border: 1px solid #e5e7eb;
+            border: 2px solid #000000;
             border-radius: 4px;
             font-size: 0.9rem;
             cursor: pointer;
@@ -358,7 +231,7 @@ try {
         .empty-state {
             text-align: center;
             padding: 3rem 2rem;
-            color: #6b7280;
+            color: #999999;
         }
 
         .action-buttons {
@@ -368,7 +241,7 @@ try {
 
         .btn-detalhes, .btn-imprimir {
             padding: 0.6rem 1rem;
-            background: #DC2626;
+            background: #000000;
             color: white;
             border: none;
             border-radius: 4px;
@@ -380,50 +253,36 @@ try {
             transition: all 0.2s;
         }
 
-        .btn-imprimir {
-            background: #3B82F6;
-        }
-
-        .btn-detalhes:hover {
-            background: #B91C1C;
-        }
-
+        .btn-detalhes:hover,
         .btn-imprimir:hover {
-            background: #2563EB;
+            background: #333333;
         }
 
         @media (max-width: 768px) {
-            .admin-header {
+            .header {
                 padding: 1.5rem 1rem;
             }
 
-            .logo-admin {
-                width: 70px;
-                height: 70px;
-                margin-bottom: 0.8rem;
-            }
-
-            .logo-admin img {
-                width: 60px;
-                height: 60px;
-            }
-
-            .admin-header h1 {
-                font-size: 1.3rem;
-            }
-
-            .admin-container {
-                padding: 1.5rem 1rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
+            .header-content {
+                flex-direction: column;
                 gap: 1rem;
             }
 
-            .stat-card.grande {
-                grid-column: span 1;
-                padding: 1.5rem;
+            .header h1 {
+                font-size: 1.3rem;
+            }
+
+            .container {
+                padding: 1.5rem 1rem;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab-btn, .btn-voltar {
+                width: 100%;
+                margin-left: 0 !important;
             }
 
             .filters {
@@ -435,17 +294,6 @@ try {
             .filters select {
                 width: 100%;
                 min-width: 100%;
-            }
-
-            .tabs {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .tab-btn, .btn-voltar {
-                width: 100%;
-                padding: 0.7rem;
-                margin-left: 0 !important;
             }
 
             .data-table {
@@ -465,50 +313,17 @@ try {
     </style>
 </head>
 <body>
-    <!-- HEADER NO TOPO -->
-    <div class="admin-header">
-        <div class="logo-admin">
-            <img src="../assets/img/logo.webp" alt="Pizzaria São Paulo">
+    <div class="header">
+        <div class="header-content">
+            <h1>Gerenciar Pedidos</h1>
+            <a href="dashboard.php" class="btn-voltar">Dashboard</a>
         </div>
-        <h1>Painel Admin</h1>
-        <p>Pedidos e Clientes</p>
     </div>
 
-    <!-- CONTAINER PRINCIPAL -->
-    <div class="admin-container">
-        <!-- NOTIFICAÇÃO DE NOVO PEDIDO -->
-        <div id="notification" class="notification-banner">
-            <div class="notification-content">
-                <h3>Novo Pedido!</h3>
-                <p id="notif-texto">Você tem um novo pedido</p>
-            </div>
-            <button class="btn-close-notif" onclick="this.parentElement.classList.remove('show')">Fechar</button>
-        </div>
-
-        <!-- DASHBOARD ESTATÍSTICAS COM TAMANHOS DIVERSIFICADOS -->
-        <div class="stats-grid">
-            <div class="stat-card grande">
-                <div class="stat-label">Total Pedidos</div>
-                <div class="stat-value"><?php echo $total_pedidos; ?></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Clientes</div>
-                <div class="stat-value"><?php echo $total_clientes; ?></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Faturamento</div>
-                <div class="stat-value">R$ <?php echo number_format($total_vendido, 0, ',', '.'); ?></div>
-            </div>
-            <div class="stat-card pequeño">
-                <div class="stat-label">Hoje</div>
-                <div class="stat-value"><?php echo $pedidos_hoje; ?></div>
-            </div>
-        </div>
-
-        <!-- ABAS -->
+    <div class="container">
         <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('pedidos')">Pedidos</button>
-            <button class="tab-btn" onclick="showTab('clientes')">Clientes</button>
+            <button class="tab-btn active" onclick="showTab('pedidos', event)">Pedidos</button>
+            <button class="tab-btn" onclick="showTab('clientes', event)">Clientes</button>
             <a href="../" class="btn-voltar">Voltar</a>
         </div>
 
@@ -542,7 +357,7 @@ try {
                                     <td class="cliente-nome"><?php echo htmlspecialchars(strlen($p['cliente_nome']) > 15 ? substr($p['cliente_nome'], 0, 12) . '...' : $p['cliente_nome']); ?></td>
                                     <td class="pedido-total">R$ <?php echo number_format($p['total'], 0, ',', '.'); ?></td>
                                     <td>
-                                        <span class="status-badge <?php echo strtolower($p['status_nome'] ?? 'novo'); ?>">
+                                        <span class="status-badge">
                                             <?php echo $p['status_nome'] ?? 'Novo'; ?>
                                         </span><br>
                                         <select class="status-select" onchange="mudarStatus(<?php echo $p['id']; ?>, this.value)">
@@ -603,9 +418,8 @@ try {
     </div>
 
     <script>
-        let ultimoPedidoID = <?php echo count($pedidos) > 0 ? max(array_column($pedidos, 'id')) : 0; ?>;
-
-        function showTab(tab) {
+        function showTab(tab, event) {
+            event.preventDefault();
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(tab).classList.add('active');
@@ -649,14 +463,11 @@ try {
         }
 
         function verificarNovosPedidos() {
-            fetch('../api/verificar_pedidos.php?ultimo_id=' + ultimoPedidoID)
+            fetch('../api/verificar_pedidos.php')
                 .then(r => r.json())
                 .then(d => {
                     if (d.novo_pedido) {
-                        ultimoPedidoID = d.id;
-                        document.getElementById('notif-texto').innerText = `Novo: ${d.cliente} - ${d.numero_pedido}`;
-                        document.getElementById('notification').classList.add('show');
-                        setTimeout(() => location.reload(), 5000);
+                        location.reload();
                     }
                 });
         }
