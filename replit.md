@@ -45,22 +45,35 @@ Sistema completo de pedidos de pizza com fluxo wizard mobile (8 passos) e painel
 ```
 /cardapio/index.php          → Interface wizard cliente
 /admin/
-  /pedidos.php               → Dashboard com notificação e impressão
+  /dashboard.php             → Dashboard com estatísticas
+  /pedidos.php               → Gerenciamento com notificação e impressão
 /api/
   /criar_pedido.php          → Salva novo pedido
   /atualizar_status.php      → Atualiza status do pedido
-  /verificar_pedidos.php     → Verifica novos pedidos em tempo real
+  /verificar_pedidos.php     → Verifica novos pedidos em tempo real (polling 3s)
+  /get_pedidos.php           → Lista pedidos com filtros
   /enderecos.php             → CRUD endereços
   /get_tamanhos.php          → Lista tamanhos
+/config/
+  /database.php              → SQLite com 16 tabelas
 ```
+
+## 🗄️ Banco de Dados (SQLite)
+**Tabelas Principais:**
+- usuarios, categorias, tamanhos_pizza, produtos, bebidas, bairros
+- enderecos, status_pedido, pedidos, pedido_itens, pedido_bebidas
+- motoboys, entregas, adicionais, promocoes, admin_logs
+
+**Dados Iniciais:**
+- 46 pizzas | 7 bebidas | 8 bairros | 6 status | 4 adicionais | 3 promoções
 
 ## Design System
 - **Cor Primária:** Vermelho #DC2626
 - **Cor de Sucesso:** Verde #10B981
 - **Cor Info:** Azul #3B82F6
 - **Tipografia:** Inter sans-serif
-- **Layout:** Sidebar + main responsivo
+- **Layout:** Sidebar fixo 250px + conteúdo responsivo
 
 ---
-**Última atualização:** 30/11/2025 - Layout completo reformulado e responsivo
+**Última atualização:** 30/11/2025 - Banco de dados completo com tabelas de motoboys, entregas e admin_logs
 

@@ -210,6 +210,45 @@ class Database {
             ativo INTEGER DEFAULT 1,
             criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
         )");
+
+        $this->pdo->exec("CREATE TABLE IF NOT EXISTS motoboys (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL,
+            telefone TEXT NOT NULL,
+            cnh TEXT,
+            placa_moto TEXT,
+            modelo_moto TEXT,
+            cor_moto TEXT,
+            foto TEXT,
+            ativo INTEGER DEFAULT 1,
+            disponivel INTEGER DEFAULT 1,
+            criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+            atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+        )");
+
+        $this->pdo->exec("CREATE TABLE IF NOT EXISTS entregas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            pedido_id INTEGER NOT NULL,
+            motoboy_id INTEGER,
+            status_entrega TEXT DEFAULT 'pendente',
+            observacoes TEXT,
+            atribuida_em DATETIME,
+            coletada_em DATETIME,
+            entregue_em DATETIME,
+            criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
+            FOREIGN KEY (motoboy_id) REFERENCES motoboys(id) ON DELETE SET NULL
+        )");
+
+        $this->pdo->exec("CREATE TABLE IF NOT EXISTS admin_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER,
+            acao TEXT NOT NULL,
+            detalhes TEXT,
+            ip TEXT,
+            criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+        )");
     }
     
     private function insertInitialData() {
@@ -268,6 +307,12 @@ class Database {
             ('Bacon', 10.00, 1),
             ('Mussarela Extra', 12.00, 1),
             ('Cheddar', 10.00, 1)
+        ");
+
+        $this->pdo->exec("INSERT OR IGNORE INTO promocoes (nome, descricao, preco, desconto, ativo) VALUES
+            ('Promo 8 Fatias', 'Escolha 2 pizzas de qualquer categoria por um preco especial', 99.90, 15.00, 1),
+            ('Dupla + Guarana', 'Leve 2 pizzas + Guarana Coroa 2L', 109.90, 10.00, 1),
+            ('Combo Familiar', '1 pizza grande + 2 refrigerantes', 89.90, 5.00, 1)
         ");
         
         $this->insertPizzas();
