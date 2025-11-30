@@ -23,19 +23,25 @@ try {
     ");
     $clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Busca pedidos
+    // Busca pedidos com status
     $stmt = $pdo->query("
-        SELECT p.*, u.nome as cliente_nome, u.telefone, e.logradouro, e.numero, e.bairro
+        SELECT p.*, u.nome as cliente_nome, u.telefone, e.logradouro, e.numero, e.bairro, sp.nome as status_nome
         FROM pedidos p
         LEFT JOIN usuarios u ON p.usuario_id = u.id
         LEFT JOIN enderecos e ON p.endereco_id = e.id
+        LEFT JOIN status_pedido sp ON p.status_id = sp.id
         ORDER BY p.criado_em DESC
         LIMIT 50
     ");
     $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Busca status disponíveis
+    $stmt = $pdo->query("SELECT id, nome FROM status_pedido ORDER BY ordem");
+    $status_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $clientes = [];
     $pedidos = [];
+    $status_list = [];
 }
 ?>
 <!DOCTYPE html>
@@ -106,6 +112,7 @@ try {
             text-align: left;
             font-weight: 600;
             border-bottom: 2px solid #e5e7eb;
+            font-size: 0.9rem;
         }
         .data-table td {
             padding: 1rem;
@@ -149,6 +156,51 @@ try {
         .btn-detalhes:hover {
             background: #2563eb;
         }
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .status-badge.confirmado {
+            background: #bfdbfe;
+            color: #1e3a8a;
+        }
+        .status-badge.entregue {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-badge.cancelado {
+            background: #fee2e2;
+            color: #7f1d1d;
+        }
+        .tracking-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .status-select {
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            min-width: 150px;
+        }
+        .btn-atualizar {
+            padding: 0.5rem 1rem;
+            background: #059669;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .btn-atualizar:hover {
+            background: #047857;
+        }
     </style>
 </head>
 <body>
@@ -168,7 +220,7 @@ try {
             </button>
         </div>
 
-        <!-- ABA PEDIDOS -->
+        <!-- ABA PEDIDOS COM RASTREAMENTO -->
         <div id="pedidos" class="tab-content active">
             <div class="table-section">
                 <?php if ($pedidos && count($pedidos) > 0): ?>
@@ -180,6 +232,7 @@ try {
                                 <th>Telefone</th>
                                 <th>Endereço</th>
                                 <th>Total</th>
+                                <th>Status Rastreamento</th>
                                 <th>Data Pedido</th>
                                 <th>Ações</th>
                             </tr>
@@ -198,6 +251,21 @@ try {
                                         </small>
                                     </td>
                                     <td class="pedido-total">R$ <?php echo number_format($pedido['total'], 2, ',', '.'); ?></td>
+                                    <td>
+                                        <div class="tracking-row">
+                                            <span class="status-badge <?php echo strtolower(str_replace(' ', '-', $pedido['status_nome'] ?? 'novo')); ?>">
+                                                <?php echo htmlspecialchars($pedido['status_nome'] ?? 'Novo'); ?>
+                                            </span>
+                                            <select class="status-select" id="status-<?php echo $pedido['id']; ?>" onchange="atualizarStatus(<?php echo $pedido['id']; ?>, this.value)">
+                                                <option value="">Mudar...</option>
+                                                <?php foreach ($status_list as $status): ?>
+                                                    <option value="<?php echo $status['id']; ?>" <?php echo $pedido['status_id'] == $status['id'] ? 'selected' : ''; ?>>
+                                                        <?php echo htmlspecialchars($status['nome']); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    </td>
                                     <td>
                                         <small>
                                             <?php echo date('d/m/Y', strtotime($pedido['criado_em'])); ?>
@@ -250,7 +318,7 @@ try {
                                     <td>
                                         <?php 
                                         $num_pedidos = count(array_filter($pedidos, fn($p) => $p['usuario_id'] == $cliente['id']));
-                                        echo $num_pedidos > 0 ? $num_pedidos . ' pedido(s)' : 'Sem pedidos';
+                                        echo $num_pedidos > 0 ? '<strong>' . $num_pedidos . '</strong> pedido(s)' : 'Sem pedidos';
                                         ?>
                                     </td>
                                 </tr>
@@ -268,21 +336,34 @@ try {
 
     <script>
         function showTab(tabName) {
-            // Esconde todas as abas
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
-            
-            // Remove active de todos os botões
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
-            // Mostra a aba selecionada
             document.getElementById(tabName).classList.add('active');
-            
-            // Marca o botão como ativo
             event.target.classList.add('active');
+        }
+
+        function atualizarStatus(pedidoId, statusId) {
+            if (!statusId) return;
+            
+            fetch('../api/atualizar_status.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'pedido_id=' + pedidoId + '&status_id=' + statusId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Status atualizado com sucesso!');
+                    location.reload();
+                } else {
+                    alert('Erro ao atualizar status');
+                }
+            })
+            .catch(e => alert('Erro: ' + e));
         }
     </script>
 </body>
