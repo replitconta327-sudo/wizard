@@ -14,6 +14,16 @@ try {
     $database = new Database();
     $pdo = $database->pdo();
     
+    // Busca clientes cadastrados
+    $stmt = $pdo->query("
+        SELECT id, nome, telefone, email, criado_em
+        FROM usuarios
+        ORDER BY criado_em DESC
+        LIMIT 50
+    ");
+    $clientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Busca pedidos
     $stmt = $pdo->query("
         SELECT p.*, u.nome as cliente_nome, u.telefone, e.logradouro, e.numero, e.bairro
         FROM pedidos p
@@ -24,6 +34,7 @@ try {
     ");
     $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
+    $clientes = [];
     $pedidos = [];
 }
 ?>
@@ -32,12 +43,12 @@ try {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Painel Admin - Pedidos</title>
+    <title>Painel Admin - Pedidos e Clientes</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="../assets/css/style.css" rel="stylesheet">
     <style>
         .admin-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
         }
@@ -49,38 +60,60 @@ try {
             border-bottom: 2px solid #e5e7eb;
             padding-bottom: 1rem;
         }
-        .pedidos-table {
-            width: 100%;
-            border-collapse: collapse;
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: #059669;
+            color: white;
+        }
+        .tab-btn:hover {
+            background: #e5e7eb;
+        }
+        .tab-btn.active:hover {
+            background: #047857;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .table-section {
             background: white;
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .pedidos-table th {
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th {
             background: #f3f4f6;
             padding: 1rem;
             text-align: left;
             font-weight: 600;
             border-bottom: 2px solid #e5e7eb;
         }
-        .pedidos-table td {
+        .data-table td {
             padding: 1rem;
             border-bottom: 1px solid #e5e7eb;
         }
-        .pedidos-table tr:hover {
+        .data-table tr:hover {
             background: #f9fafb;
         }
-        .status-badge {
-            display: inline-block;
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-        .status-novo { background: #fef3c7; color: #92400e; }
-        .status-confirmado { background: #bfdbfe; color: #1e3a8a; }
-        .status-entregue { background: #d1fae5; color: #065f46; }
         .pedido-numero {
             font-weight: 600;
             color: #dc2626;
@@ -88,6 +121,19 @@ try {
         .pedido-total {
             font-weight: 600;
             color: #059669;
+        }
+        .cliente-nome {
+            font-weight: 600;
+            color: #111827;
+        }
+        .data-pequena {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
         }
         .btn-detalhes {
             padding: 0.5rem 1rem;
@@ -97,60 +143,147 @@ try {
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-block;
         }
         .btn-detalhes:hover {
             background: #2563eb;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: #6b7280;
         }
     </style>
 </head>
 <body>
     <div class="admin-container">
         <div class="admin-header">
-            <h1>Painel Admin - Pedidos</h1>
+            <h1>Painel Admin</h1>
             <a href="../" class="btn btn-secondary">Voltar</a>
         </div>
 
-        <?php if ($pedidos && count($pedidos) > 0): ?>
-            <table class="pedidos-table">
-                <thead>
-                    <tr>
-                        <th>Número</th>
-                        <th>Cliente</th>
-                        <th>Telefone</th>
-                        <th>Endereço</th>
-                        <th>Total</th>
-                        <th>Forma Pagamento</th>
-                        <th>Data</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($pedidos as $pedido): ?>
-                        <tr>
-                            <td class="pedido-numero"><?php echo htmlspecialchars($pedido['numero_pedido']); ?></td>
-                            <td><?php echo htmlspecialchars($pedido['cliente_nome'] ?? 'N/A'); ?></td>
-                            <td><?php echo htmlspecialchars($pedido['telefone'] ?? 'N/A'); ?></td>
-                            <td><?php echo htmlspecialchars(($pedido['logradouro'] ?? 'N/A') . ', ' . ($pedido['numero'] ?? '') . ' - ' . ($pedido['bairro'] ?? '')); ?></td>
-                            <td class="pedido-total">R$ <?php echo number_format($pedido['total'], 2, ',', '.'); ?></td>
-                            <td><?php echo htmlspecialchars(strtoupper($pedido['forma_pagamento'] ?? 'N/A')); ?></td>
-                            <td><?php echo date('d/m/Y H:i', strtotime($pedido['criado_em'] ?? 'now')); ?></td>
-                            <td>
-                                <a href="pedido_detalhes.php?id=<?php echo $pedido['id']; ?>" class="btn-detalhes">Detalhes</a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php else: ?>
-            <div class="empty-state">
-                <p>Nenhum pedido encontrado.</p>
+        <!-- ABAS -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('pedidos')">
+                📋 Pedidos (<?php echo count($pedidos); ?>)
+            </button>
+            <button class="tab-btn" onclick="showTab('clientes')">
+                👥 Clientes (<?php echo count($clientes); ?>)
+            </button>
+        </div>
+
+        <!-- ABA PEDIDOS -->
+        <div id="pedidos" class="tab-content active">
+            <div class="table-section">
+                <?php if ($pedidos && count($pedidos) > 0): ?>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Número Pedido</th>
+                                <th>Cliente</th>
+                                <th>Telefone</th>
+                                <th>Endereço</th>
+                                <th>Total</th>
+                                <th>Data Pedido</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($pedidos as $pedido): ?>
+                                <tr>
+                                    <td class="pedido-numero"><?php echo htmlspecialchars($pedido['numero_pedido']); ?></td>
+                                    <td class="cliente-nome"><?php echo htmlspecialchars($pedido['cliente_nome'] ?? 'N/A'); ?></td>
+                                    <td><?php echo htmlspecialchars($pedido['telefone'] ?? 'N/A'); ?></td>
+                                    <td>
+                                        <small>
+                                            <?php echo htmlspecialchars(($pedido['logradouro'] ?? 'N/A') . ', ' . ($pedido['numero'] ?? '')); ?>
+                                            <br/>
+                                            <?php echo htmlspecialchars($pedido['bairro'] ?? 'N/A'); ?>
+                                        </small>
+                                    </td>
+                                    <td class="pedido-total">R$ <?php echo number_format($pedido['total'], 2, ',', '.'); ?></td>
+                                    <td>
+                                        <small>
+                                            <?php echo date('d/m/Y', strtotime($pedido['criado_em'])); ?>
+                                            <br/>
+                                            <span class="data-pequena"><?php echo date('H:i', strtotime($pedido['criado_em'])); ?></span>
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <a href="pedido_detalhes.php?id=<?php echo $pedido['id']; ?>" class="btn-detalhes">Ver</a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <div class="empty-state">
+                        <p>Nenhum pedido encontrado.</p>
+                    </div>
+                <?php endif; ?>
             </div>
-        <?php endif; ?>
+        </div>
+
+        <!-- ABA CLIENTES -->
+        <div id="clientes" class="tab-content">
+            <div class="table-section">
+                <?php if ($clientes && count($clientes) > 0): ?>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nome Cliente</th>
+                                <th>Telefone</th>
+                                <th>Email</th>
+                                <th>Data Cadastro</th>
+                                <th>Pedidos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($clientes as $cliente): ?>
+                                <tr>
+                                    <td class="cliente-nome"><?php echo htmlspecialchars($cliente['nome']); ?></td>
+                                    <td><?php echo htmlspecialchars($cliente['telefone'] ?? 'N/A'); ?></td>
+                                    <td><?php echo htmlspecialchars($cliente['email'] ?? 'N/A'); ?></td>
+                                    <td>
+                                        <small>
+                                            <?php echo date('d/m/Y', strtotime($cliente['criado_em'])); ?>
+                                            <br/>
+                                            <span class="data-pequena"><?php echo date('H:i', strtotime($cliente['criado_em'])); ?></span>
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <?php 
+                                        $num_pedidos = count(array_filter($pedidos, fn($p) => $p['usuario_id'] == $cliente['id']));
+                                        echo $num_pedidos > 0 ? $num_pedidos . ' pedido(s)' : 'Sem pedidos';
+                                        ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <div class="empty-state">
+                        <p>Nenhum cliente cadastrado.</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
+
+    <script>
+        function showTab(tabName) {
+            // Esconde todas as abas
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active de todos os botões
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Mostra a aba selecionada
+            document.getElementById(tabName).classList.add('active');
+            
+            // Marca o botão como ativo
+            event.target.classList.add('active');
+        }
+    </script>
 </body>
 </html>
