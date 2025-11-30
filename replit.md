@@ -10,8 +10,7 @@ Sistema completo de pedidos de pizza com fluxo wizard mobile (8 passos) e painel
 ### 🔗 Links de Acesso
 - **Cliente:** `/cardapio/` - Fluxo wizard de pedidos
 - **Admin Demo:** Clique em "Acessar Painel Admin" na homepage
-- **Admin Dashboard:** `/admin/dashboard.php`
-- **Admin Pedidos:** `/admin/pedidos.php`
+- **Admin Dashboard:** `/admin/pedidos.php`
 
 ### 🍕 Cliente - Fluxo de Pedido (8 Passos)
 1. **Tamanho** - Escolher P/M/G
@@ -31,35 +30,35 @@ Sistema completo de pedidos de pizza com fluxo wizard mobile (8 passos) e painel
 - ✅ Persistência de estado (localStorage/sessionStorage)
 
 ### 👨‍💼 Admin - Painel Completo
-**Localização:** `/admin/`
+**Localização:** `/admin/pedidos.php`
 
-#### Páginas:
-1. **dashboard.php** - Estatísticas gerais
+**Design:** Segue padrão do cliente com cores vermelhas (#DC2626) e logo da marca
+
+#### Funcionalidades:
+1. **Dashboard com Estatísticas**
    - Total de pedidos
-   - Pedidos hoje
-   - Pendentes
-   - Total vendido
-   - Gráfico dos últimos 7 dias
+   - Total de clientes
+   - Faturamento total
+   - Pedidos de hoje
 
-2. **pedidos.php** - Lista de pedidos
-   - Resumo: Total, Hoje, Total Vendido
-   - Busca por cliente/número
+2. **Aba Pedidos**
+   - Lista de todos os pedidos
+   - Rastreamento com badge de status (Novo/Confirmado/Entregue/Cancelado)
+   - Dropdown para mudar status em tempo real
+   - Busca por número ou cliente
    - Filtro por status
-   - Tabela com pedidos (50 últimos)
-   - Link para detalhes
+   - Link para detalhes completo
+   - Data e hora de cada pedido
 
-3. **pedido_detalhes.php** - Detalhes completo
-   - Informações do pedido
-   - Dados do cliente (nome, tel, email)
-   - Endereço de entrega
-   - Itens (pizzas, adicionais, bebidas)
-   - Total com breakdown
-   - Gerenciar status (dropdown + atualizar)
-   - Botão imprimir
+3. **Aba Clientes**
+   - Lista de clientes cadastrados
+   - Busca por nome
+   - Dados: Nome, Telefone, Email, Data Cadastro
+   - Contagem de pedidos por cliente
 
 ### 📱 APIs
 - `POST /api/criar_pedido.php` - Cria novo pedido no banco
-- `POST /api/atualizar_pedido.php` - Atualiza status do pedido
+- `POST /api/atualizar_status.php` - Atualiza status do pedido
 - `GET /api/enderecos.php?action=list` - Lista endereços do usuário
 - `POST /api/enderecos.php?action=add` - Cadastra novo endereço
 - `GET /api/get_tamanhos.php` - Lista tamanhos
@@ -92,20 +91,21 @@ Tabelas principais:
 - Suporta múltiplas pizzas na mesma encomenda
 - Admin requer autenticação (session)
 - Todos os totais: pizzas + adicionais + bebidas + taxa entrega
+- Rastreamento de status em tempo real
+- Interface admin com padrão visual consistente
 
 ### 📂 Estrutura
 ```
 /cardapio/index.php          → Interface wizard cliente
 /assets/
   /css/pages/cardapio.css    → Estilos do wizard
+  /css/style.css             → Estilos principais com design system
   /js/pages/cardapio.js      → Lógica do wizard
 /admin/
-  /pedidos.php               → Lista de pedidos
-  /pedido_detalhes.php       → Detalhes completo
-  /dashboard.php             → Estatísticas
+  /pedidos.php               → Dashboard e rastreamento
 /api/
   /criar_pedido.php          → Salva novo pedido
-  /atualizar_pedido.php      → Atualiza status
+  /atualizar_status.php      → Atualiza status do pedido
   /enderecos.php             → CRUD endereços
   /get_tamanhos.php          → Lista tamanhos
 /config/
@@ -113,16 +113,27 @@ Tabelas principais:
   /cardapio_data.php         → Dados em JSON
 ```
 
+## Design System
+- **Cor Primária:** Vermelho #DC2626 (pizza)
+- **Cor Secundária:** Laranja #F59E0B (queijo)
+- **Cor de Sucesso:** Verde #10B981 (entregue)
+- **Tipografia:** Inter sans-serif
+- **Espaçamento:** Escala modular (4px base)
+- **Sombras:** Sutis para profundidade
+- **Transições:** 150-350ms ease-in-out
+
 ## Workflow
 - **Pizzaria Server** - PHP dev server na porta 5000
 
 ## Próximas Melhorias (Opcionais)
-- [ ] Autenticação admin com login
+- [ ] Autenticação admin com login seguro
 - [ ] Relatórios de vendas por período
 - [ ] Sistema de promoções/cupons
 - [ ] Notificações por email/SMS
 - [ ] API pública para integração
 - [ ] Modo escuro
+- [ ] Exportar pedidos em PDF
 
 ---
-**Última atualização:** 30/11/2025 - MVP Completo
+**Última atualização:** 30/11/2025 - Painel Admin com Rastreamento e Design Unificado
+
