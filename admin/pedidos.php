@@ -124,6 +124,7 @@ try {
             color: #666;
             font-size: 0.9rem;
             margin-bottom: 0.5rem;
+            font-weight: 500;
         }
 
         .stat-value {
@@ -340,34 +341,34 @@ try {
             <!-- DASHBOARD ESTATÍSTICAS -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-label">📋 Total Pedidos</div>
+                    <div class="stat-label">Total Pedidos</div>
                     <div class="stat-value"><?php echo $total_pedidos; ?></div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">👥 Total Clientes</div>
+                    <div class="stat-label">Total Clientes</div>
                     <div class="stat-value"><?php echo $total_clientes; ?></div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">💰 Faturamento</div>
+                    <div class="stat-label">Faturamento</div>
                     <div class="stat-value">R$ <?php echo number_format($total_vendido, 0, ',', '.'); ?></div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">📅 Hoje</div>
+                    <div class="stat-label">Hoje</div>
                     <div class="stat-value"><?php echo $pedidos_hoje; ?></div>
                 </div>
             </div>
 
             <!-- ABAS -->
             <div class="tabs">
-                <button class="tab-btn active" onclick="showTab('pedidos')">📋 Pedidos (<?php echo $total_pedidos; ?>)</button>
-                <button class="tab-btn" onclick="showTab('clientes')">👥 Clientes (<?php echo $total_clientes; ?>)</button>
-                <a href="../" class="btn-voltar">← Voltar</a>
+                <button class="tab-btn active" onclick="showTab('pedidos')">Pedidos (<?php echo $total_pedidos; ?>)</button>
+                <button class="tab-btn" onclick="showTab('clientes')">Clientes (<?php echo $total_clientes; ?>)</button>
+                <a href="../" class="btn-voltar">Voltar</a>
             </div>
 
             <!-- ABA PEDIDOS -->
             <div id="pedidos" class="tab-content active">
                 <div class="filters">
-                    <input type="text" id="search-pedido" placeholder="🔍 Buscar pedido ou cliente...">
+                    <input type="text" id="search-pedido" placeholder="Buscar pedido ou cliente...">
                     <select id="filter-status">
                         <option value="">Todos os status</option>
                         <?php foreach ($status_list as $status): ?>
@@ -424,7 +425,7 @@ try {
             <!-- ABA CLIENTES -->
             <div id="clientes" class="tab-content">
                 <div class="filters">
-                    <input type="text" id="search-cliente" placeholder="🔍 Buscar cliente...">
+                    <input type="text" id="search-cliente" placeholder="Buscar cliente...">
                 </div>
                 <div class="table-section">
                     <?php if ($clientes): ?>
@@ -474,9 +475,8 @@ try {
                 body: 'pedido_id=' + id + '&status_id=' + status
             }).then(r => r.json()).then(d => {
                 if (d.success) {
-                    alert('✅ Status atualizado!');
                     location.reload();
-                } else alert('❌ Erro ao atualizar');
+                } else alert('Erro ao atualizar status');
             });
         }
 
