@@ -59,56 +59,62 @@ try {
         .page-wrapper {
             display: flex;
             min-height: 100vh;
-            gap: 2rem;
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
+            gap: 0;
+            padding: 0;
+            margin: 0;
         }
 
         .admin-sidebar {
             background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-            min-width: 280px;
+            padding: 3rem 2rem;
+            border-radius: 0;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+            min-width: 320px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
             color: white;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
         }
 
         .logo-admin {
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             background: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         .logo-admin img {
-            width: 90px;
-            height: 90px;
+            width: 110px;
+            height: 110px;
         }
 
         .admin-sidebar h1 {
-            margin: 0 0 0.5rem 0;
-            font-size: 1.8rem;
+            margin: 0 0 0.8rem 0;
+            font-size: 2rem;
             font-weight: 700;
         }
 
         .admin-sidebar p {
             margin: 0;
-            font-size: 0.95rem;
+            font-size: 1rem;
             opacity: 0.95;
         }
 
         .admin-main {
             flex: 1;
+            padding: 3rem;
+            overflow-y: auto;
+            max-height: 100vh;
         }
 
         .notification-banner {
@@ -116,7 +122,7 @@ try {
             color: white;
             padding: 1.5rem;
             border-radius: 8px;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             display: none;
             align-items: center;
             justify-content: space-between;
@@ -164,49 +170,49 @@ try {
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .stat-card {
             background: white;
             border-radius: 8px;
-            padding: 1.5rem;
+            padding: 2rem;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            border-left: 5px solid #DC2626;
+            border-left: 6px solid #DC2626;
         }
 
         .stat-label {
             color: #666;
-            font-size: 0.85rem;
-            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
             font-weight: 500;
         }
 
         .stat-value {
-            font-size: 1.5rem;
+            font-size: 2rem;
             font-weight: 700;
             color: #DC2626;
         }
 
         .tabs {
             display: flex;
-            gap: 0.8rem;
-            margin-bottom: 1.5rem;
+            gap: 1rem;
+            margin-bottom: 2rem;
             align-items: center;
             flex-wrap: wrap;
         }
 
         .tab-btn {
-            padding: 0.7rem 1.3rem;
+            padding: 0.8rem 1.5rem;
             background: #DC2626;
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 1rem;
             transition: all 0.2s;
             white-space: nowrap;
         }
@@ -223,14 +229,14 @@ try {
 
         .btn-voltar {
             margin-left: auto;
-            padding: 0.7rem 1.3rem;
+            padding: 0.8rem 1.5rem;
             background: white;
             color: #DC2626;
             border: 2px solid #DC2626;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 1rem;
             text-decoration: none;
             display: inline-block;
             transition: all 0.2s;
@@ -253,9 +259,9 @@ try {
         .filters {
             display: flex;
             gap: 1rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             background: white;
-            padding: 1.2rem;
+            padding: 1.5rem;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             flex-wrap: wrap;
@@ -263,13 +269,13 @@ try {
 
         .filters input,
         .filters select {
-            padding: 0.6rem 1rem;
+            padding: 0.7rem 1.2rem;
             border: 1px solid #e5e7eb;
             border-radius: 6px;
             font-size: 1rem;
             font-family: inherit;
             flex: 1;
-            min-width: 150px;
+            min-width: 250px;
             background: white;
         }
 
@@ -291,12 +297,12 @@ try {
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
 
         .data-table th {
             background: white;
-            padding: 1rem;
+            padding: 1.2rem;
             text-align: left;
             font-weight: 600;
             color: #374151;
@@ -305,7 +311,7 @@ try {
         }
 
         .data-table td {
-            padding: 1rem;
+            padding: 1.2rem;
             border-bottom: 1px solid #e5e7eb;
         }
 
@@ -316,7 +322,7 @@ try {
         .pedido-numero {
             font-weight: 700;
             color: #DC2626;
-            min-width: 80px;
+            min-width: 100px;
         }
 
         .pedido-total {
@@ -331,9 +337,9 @@ try {
 
         .status-badge {
             display: inline-block;
-            padding: 0.3rem 0.8rem;
+            padding: 0.4rem 0.9rem;
             border-radius: 4px;
-            font-size: 0.75rem;
+            font-size: 0.85rem;
             font-weight: 600;
             margin-right: 0.5rem;
             white-space: nowrap;
@@ -345,35 +351,35 @@ try {
         .status-badge.cancelado { background: #FEE2E2; color: #7F1D1D; }
 
         .status-select {
-            padding: 0.4rem;
+            padding: 0.5rem 0.8rem;
             border: 1px solid #e5e7eb;
             border-radius: 4px;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             cursor: pointer;
             background: white;
-            min-width: 100px;
+            min-width: 120px;
         }
 
         .empty-state {
             text-align: center;
-            padding: 2rem;
+            padding: 3rem 2rem;
             color: #6b7280;
         }
 
         .action-buttons {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.6rem;
             flex-wrap: wrap;
         }
 
         .btn-detalhes, .btn-imprimir {
-            padding: 0.5rem 0.8rem;
+            padding: 0.6rem 1rem;
             background: #DC2626;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.75rem;
+            font-size: 0.9rem;
             text-decoration: none;
             display: inline-block;
             font-weight: 600;
@@ -395,43 +401,64 @@ try {
             transform: translateY(-1px);
         }
 
-        /* MOBILE RESPONSIVO */
-        @media (max-width: 768px) {
-            .page-wrapper {
-                flex-direction: column;
-                gap: 1rem;
-                padding: 1rem;
-            }
-
+        /* TABLET E MOBILE */
+        @media (max-width: 1024px) {
             .admin-sidebar {
-                min-width: 100%;
-                padding: 1.5rem;
-                border-radius: 8px;
+                min-width: 280px;
+                padding: 2rem 1.5rem;
             }
 
-            .logo-admin {
-                width: 80px;
-                height: 80px;
-                margin-bottom: 1rem;
-            }
-
-            .logo-admin img {
-                width: 70px;
-                height: 70px;
-            }
-
-            .admin-sidebar h1 {
-                font-size: 1.3rem;
-            }
-
-            .admin-sidebar p {
-                font-size: 0.85rem;
+            .admin-main {
+                padding: 2rem;
             }
 
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 0.8rem;
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-wrapper {
+                flex-direction: column;
+            }
+
+            .admin-sidebar {
+                min-width: 100%;
+                height: auto;
+                position: static;
+                padding: 2rem 1rem;
+            }
+
+            .logo-admin {
+                width: 100px;
+                height: 100px;
                 margin-bottom: 1rem;
+            }
+
+            .logo-admin img {
+                width: 90px;
+                height: 90px;
+            }
+
+            .admin-sidebar h1 {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .admin-main {
+                padding: 1.5rem;
+                max-height: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+                margin-bottom: 1.5rem;
             }
 
             .stat-card {
@@ -439,44 +466,38 @@ try {
             }
 
             .stat-label {
-                font-size: 0.75rem;
+                font-size: 0.85rem;
+                margin-bottom: 0.5rem;
             }
 
             .stat-value {
-                font-size: 1.2rem;
-            }
-
-            .tabs {
-                gap: 0.5rem;
-            }
-
-            .tab-btn {
-                padding: 0.6rem 1rem;
-                font-size: 0.85rem;
-                flex: 1;
-                min-width: 0;
-            }
-
-            .btn-voltar {
-                padding: 0.6rem 1rem;
-                font-size: 0.85rem;
-                margin-left: 0;
-                width: 100%;
-                margin-top: 0.5rem;
+                font-size: 1.3rem;
             }
 
             .filters {
                 flex-direction: column;
                 gap: 0.8rem;
-                padding: 1rem;
             }
 
             .filters input,
             .filters select {
                 width: 100%;
                 min-width: 100%;
-                font-size: 1rem;
-                padding: 0.8rem;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab-btn {
+                width: 100%;
+                padding: 0.7rem;
+            }
+
+            .btn-voltar {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
             }
 
             .data-table {
@@ -485,13 +506,7 @@ try {
 
             .data-table th,
             .data-table td {
-                padding: 0.6rem 0.5rem;
-            }
-
-            .status-select {
-                min-width: 80px;
-                padding: 0.3rem;
-                font-size: 0.75rem;
+                padding: 0.7rem;
             }
 
             .action-buttons {
@@ -499,92 +514,47 @@ try {
             }
 
             .btn-detalhes, .btn-imprimir {
-                padding: 0.4rem 0.6rem;
-                font-size: 0.7rem;
-            }
-
-            .notification-banner {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .btn-close-notif {
-                width: 100%;
-                padding: 0.6rem;
+                padding: 0.4rem 0.7rem;
+                font-size: 0.75rem;
             }
         }
 
         @media (max-width: 480px) {
-            .page-wrapper {
-                padding: 0.5rem;
-            }
-
             .admin-sidebar {
-                padding: 1rem;
+                padding: 1.5rem 1rem;
             }
 
             .logo-admin {
-                width: 70px;
-                height: 70px;
+                width: 80px;
+                height: 80px;
                 margin-bottom: 0.8rem;
             }
 
             .logo-admin img {
-                width: 60px;
-                height: 60px;
+                width: 70px;
+                height: 70px;
             }
 
             .admin-sidebar h1 {
-                font-size: 1.1rem;
+                font-size: 1.2rem;
                 margin-bottom: 0.3rem;
             }
 
-            .admin-sidebar p {
-                font-size: 0.75rem;
+            .admin-main {
+                padding: 1rem;
             }
 
             .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.5rem;
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
             }
 
             .stat-card {
                 padding: 0.8rem;
             }
 
-            .stat-label {
-                font-size: 0.7rem;
-            }
-
             .stat-value {
-                font-size: 1rem;
-            }
-
-            .tabs {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .tab-btn {
-                width: 100%;
-                padding: 0.6rem 0.8rem;
-                font-size: 0.8rem;
-            }
-
-            .btn-voltar {
-                width: 100%;
-                margin-top: 0;
-            }
-
-            .filters {
-                padding: 0.8rem;
-                gap: 0.6rem;
-            }
-
-            .filters input,
-            .filters select {
-                padding: 0.6rem;
-                font-size: 0.9rem;
+                font-size: 1.1rem;
             }
 
             .data-table {
@@ -593,22 +563,7 @@ try {
 
             .data-table th,
             .data-table td {
-                padding: 0.4rem 0.3rem;
-            }
-
-            .pedido-numero {
-                min-width: 60px;
-            }
-
-            .status-select {
-                min-width: 70px;
-                padding: 0.25rem;
-                font-size: 0.65rem;
-            }
-
-            .btn-detalhes, .btn-imprimir {
-                padding: 0.35rem 0.5rem;
-                font-size: 0.65rem;
+                padding: 0.4rem;
             }
         }
     </style>
