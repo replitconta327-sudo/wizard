@@ -108,7 +108,7 @@ class CardapioApp {
         document.getElementById('btn-skip-more-pizza')?.addEventListener('click', () => this.showStep('adicionais'));
         document.getElementById('btn-next-bebidas')?.addEventListener('click', () => this.showStep('bebidas'));
         document.getElementById('btn-next-endereco')?.addEventListener('click', () => this.showStep('endereco'));
-        document.getElementById('btn-skip-endereco')?.addEventListener('click', () => this.showStep('finalizacao'));
+        document.getElementById('btn-skip-endereco')?.addEventListener('click', () => this.confirmarEndereco());
         document.getElementById('btn-salvar-endereco')?.addEventListener('click', () => this.salvarEndereco());
         document.getElementById('btn-finalizar')?.addEventListener('click', () => this.finalizarPedido());
 
@@ -390,16 +390,23 @@ class CardapioApp {
             if (data.success && data.data?.length) {
                 list.innerHTML = data.data.map(e => `
                     <label class="endereco-item">
-                        <input type="radio" name="endereco" value="${e.id}" ${this.selectedEnderecoId === e.id ? 'checked' : ''}>
+                        <input type="radio" name="endereco" value="${e.id}" data-endereco-id="${e.id}" ${this.selectedEnderecoId === e.id ? 'checked' : ''}>
                         <span>${e.logradouro}, ${e.numero} - ${e.bairro}</span>
                     </label>
                 `).join('');
                 list.querySelectorAll('input').forEach(r => {
                     r.addEventListener('change', (e) => {
-                        this.selectedEnderecoId = parseInt(e.target.value);
+                        const enderecoId = parseInt(e.target.getAttribute('data-endereco-id'));
+                        console.log('Endereço selecionado:', enderecoId);
+                        this.selectedEnderecoId = enderecoId;
                         this.saveState();
                     });
                 });
+                // Se já tem um endereço selecionado, marca como checked
+                if (this.selectedEnderecoId) {
+                    const radio = list.querySelector(`input[value="${this.selectedEnderecoId}"]`);
+                    if (radio) radio.checked = true;
+                }
             } else {
                 list.innerHTML = 'Nenhum endereço. Preencha o formulário.';
             }
@@ -670,12 +677,28 @@ class CardapioApp {
     }
 
     // FINALIZAÇÃO
+    confirmarEndereco() {
+        const selectedRadio = document.querySelector('input[name="endereco"]:checked');
+        if (!selectedRadio) {
+            this.showError('Selecione um endereço');
+            return;
+        }
+        const enderecoId = parseInt(selectedRadio.getAttribute('data-endereco-id'));
+        this.selectedEnderecoId = enderecoId;
+        console.log('Endereço confirmado:', enderecoId);
+        this.saveState();
+        this.showStep('finalizacao');
+    }
+
     editarPedido() {
         this.showStep('tamanho');
     }
 
     async confirmarPedido() {
+        console.log('Confirmando pedido com endereço ID:', this.selectedEnderecoId);
+        
         if (!this.selectedEnderecoId) {
+            console.error('Nenhum endereço selecionado');
             this.showError('Selecione um endereço');
             this.showStep('endereco');
             return;
@@ -702,6 +725,8 @@ class CardapioApp {
             bebidas: this.selectedBebidas
         };
 
+        console.log('Enviando pedido:', payload);
+
         try {
             const res = await fetch('../api/criar_pedido.php', {
                 method: 'POST',
@@ -709,6 +734,7 @@ class CardapioApp {
                 body: JSON.stringify(payload)
             });
             const data = await res.json();
+            console.log('Resposta do servidor:', data);
             
             if (data.success) {
                 this.showSuccess('Pedido enviado com sucesso! Número: ' + data.numero_pedido);
@@ -725,6 +751,7 @@ class CardapioApp {
                 this.showError(data.message || 'Erro ao enviar pedido');
             }
         } catch (e) {
+            console.error('Erro ao enviar:', e);
             this.showError('Erro ao enviar pedido: ' + e.message);
         }
     }
