@@ -408,9 +408,6 @@ try {
                 <a href="dashboard.php" class="menu-item">
                     <span>📊</span> Dashboard
                 </a>
-                <a href="../" class="menu-item">
-                    <span>🏠</span> Voltar
-                </a>
             </div>
 
             <div class="sidebar-footer">
@@ -537,39 +534,10 @@ try {
                                 mostrarNotificacao('Novo Pedido!', `${novoPedido.cliente_nome} - ${novoPedido.numero_pedido}`);
                             }
                         }
-                        atualizarTabela(d.pedidos);
                         atualizarEstatisticas(d.total_pedidos, d.pedidos_hoje, d.total_clientes);
                     }
                 })
                 .catch(e => console.error('Erro ao atualizar:', e));
-        }
-
-        function atualizarTabela(pedidos) {
-            const tbody = document.querySelector('.data-table tbody');
-            if (!tbody) return;
-
-            const linhasAtuais = Array.from(tbody.querySelectorAll('tr')).map(tr => tr.dataset.pedidoId);
-            const pedidosNovos = pedidos.filter(p => !linhasAtuais.includes(String(p.id)));
-
-            if (pedidosNovos.length > 0) {
-                pedidosNovos.forEach(p => {
-                    const tr = document.createElement('tr');
-                    tr.dataset.pedidoId = p.id;
-                    tr.innerHTML = `
-                        <td class="pedido-numero">${p.numero_pedido.slice(-6)}</td>
-                        <td>${escapeHtml(p.cliente_nome)}</td>
-                        <td>${new Date(p.criado_em).toLocaleDateString('pt-BR')}</td>
-                        <td><span class="status-badge ${(p.status_nome || 'novo').toLowerCase()}">${p.status_nome || 'Novo'}</span></td>
-                        <td><strong>R$ ${(p.total || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
-                        <td><a href="pedido_detalhes.php?id=${p.id}" class="btn-small">Ver / Editar</a></td>
-                    `;
-                    tbody.insertBefore(tr, tbody.firstChild);
-                });
-
-                while (tbody.children.length > 15) {
-                    tbody.removeChild(tbody.lastChild);
-                }
-            }
         }
 
         function atualizarEstatisticas(total, hoje, clientes) {

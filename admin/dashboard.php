@@ -331,9 +331,6 @@ try {
                 <a href="pedidos.php" class="menu-item">
                     <span>📋</span> Gerenciar Pedidos
                 </a>
-                <a href="../" class="menu-item">
-                    <span>🏠</span> Voltar
-                </a>
             </div>
 
             <div class="sidebar-footer">
@@ -446,38 +443,10 @@ try {
                                 mostrarNotificacao('Novo Pedido!', `${novoPedido.cliente_nome} - ${novoPedido.numero_pedido}`);
                             }
                         }
-                        atualizarTabela(d.pedidos);
                         atualizarEstatisticas(d.total_pedidos, d.pedidos_hoje, d.total_clientes, d.total_vendido);
                     }
                 })
                 .catch(e => console.error('Erro ao atualizar:', e));
-        }
-
-        function atualizarTabela(pedidos) {
-            const tbody = document.querySelector('.data-table tbody');
-            if (!tbody) return;
-
-            const linhasAtuais = Array.from(tbody.querySelectorAll('tr')).map(tr => tr.dataset.pedidoId);
-            const pedidosNovos = pedidos.filter(p => !linhasAtuais.includes(String(p.id)));
-
-            if (pedidosNovos.length > 0) {
-                pedidosNovos.forEach(p => {
-                    const tr = document.createElement('tr');
-                    tr.dataset.pedidoId = p.id;
-                    tr.innerHTML = `
-                        <td class="pedido-numero">${p.numero_pedido.slice(-6)}</td>
-                        <td>${escapeHtml(p.cliente_nome)}</td>
-                        <td>${new Date(p.criado_em).toLocaleDateString('pt-BR', {hour: '2-digit', minute: '2-digit'})}</td>
-                        <td><span class="status-badge">${p.status_nome || 'Novo'}</span></td>
-                        <td><strong>R$ ${(p.total || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
-                    `;
-                    tbody.insertBefore(tr, tbody.firstChild);
-                });
-
-                while (tbody.children.length > 10) {
-                    tbody.removeChild(tbody.lastChild);
-                }
-            }
         }
 
         function atualizarEstatisticas(total, hoje, clientes, vendido) {
