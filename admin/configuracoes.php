@@ -39,6 +39,11 @@ try {
             flex-direction: column;
             overflow-y: auto;
             box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 1000;
         }
         .sidebar-header {
             padding: 2rem 1.5rem;
@@ -121,6 +126,7 @@ try {
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            margin-left: 250px;
         }
         .top-bar {
             background: white;
