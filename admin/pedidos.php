@@ -505,6 +505,43 @@ try {
     </div>
 
     <script>
+        // Sistema de notificação
+        function mostrarNotificacao(titulo, mensagem) {
+            // Se não tiver suporte a notificações, cria um banner no HTML
+            const banner = document.createElement('div');
+            banner.style.cssText = 'position: fixed; top: 20px; left: 270px; right: 20px; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); z-index: 10000; animation: slideDown 0.3s ease-in;';
+            banner.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem;">${titulo}</h3>
+                        <p style="margin: 0; opacity: 0.9;">${mensagem}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-weight: 600;">✕</button>
+                </div>
+            `;
+            document.body.appendChild(banner);
+            setTimeout(() => banner.remove(), 5000);
+        }
+
+        // Polling de novos pedidos
+        let ultimoPedidoId = <?php echo count($pedidos) > 0 ? max(array_column($pedidos, 'id')) : 0; ?>;
+
+        function verificarNovoPedido() {
+            fetch('../api/verificar_pedidos.php?ultimo_id=' + ultimoPedidoId)
+                .then(r => r.json())
+                .then(d => {
+                    if (d.novo_pedido) {
+                        ultimoPedidoId = d.id;
+                        mostrarNotificacao('Novo Pedido!', `${d.cliente} - ${d.numero_pedido}`);
+                        setTimeout(() => location.reload(), 1000);
+                    }
+                })
+                .catch(e => console.error('Erro ao verificar pedidos:', e));
+        }
+
+        setInterval(verificarNovoPedido, 3000);
+
+        // Filtros
         document.getElementById('search-pedido')?.addEventListener('input', function(e) {
             const search = e.target.value.toLowerCase();
             document.querySelectorAll('.data-table tbody tr').forEach(row => {
@@ -520,6 +557,11 @@ try {
                 else row.style.display = row.innerText.toLowerCase().includes(status) ? '' : 'none';
             });
         });
+
+        // Estilo da animação
+        const style = document.createElement('style');
+        style.textContent = '@keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }';
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
