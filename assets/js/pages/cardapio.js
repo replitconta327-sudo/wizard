@@ -1,18 +1,19 @@
 console.log('=== cardapio.js carregado com sucesso ===');
 
-// Sistema de Cardápio Digital - Pizzaria São Paulo
-// Interface limpa e profissional alinhada ao design do login/cadastro
-
 class CardapioApp {
     constructor() {
         this.currentStep = 'tamanho';
-        this.selectedSize = null;
-        this.selectedPizzas = [];
+        // Pizzas no carrinho
+        this.pizzasCart = [];
+        // Pizza sendo configurada atualmente
+        this.currentPizza = null;
+        // Seleções globais
         this.selectedAddons = [];
         this.selectedBebidas = [];
         this.selectedEnderecoId = null;
         this.paymentMethod = 'pix';
-        this.cacheDuration = 5 * 60 * 1000;
+        this.taxaEntrega = null;
+        // Dados do cardápio
         this.cardapioCache = null;
         this.adicionais = [];
         this.bebidas = [];
@@ -37,15 +38,9 @@ class CardapioApp {
             }
             
             this.setupEventListeners();
-            
-            // Forçar renderização dos tamanhos
-            console.log('Inicializando passo: tamanho');
-            this.currentStep = 'tamanho';
-            this.renderTamanhos();
-            
-            // Atualizar UI
-            this.updateOrderSummary();
+            this.restoreState();
             console.log('Cardápio inicializado com sucesso');
+            this.renderTamanhos();
         } catch (error) {
             console.error('Erro ao inicializar cardápio:', error);
             this.showError('Erro ao carregar cardápio. Tente novamente.');
@@ -53,33 +48,17 @@ class CardapioApp {
     }
 
     async carregarDadosLocais() {
-        // Tenta carregar do banco de dados primeiro
         try {
             const response = await fetch('/api/get_tamanhos.php');
             const result = await response.json();
-            
             if (result.success && result.data && result.data.length > 0) {
                 this.tamanhos = result.data;
-                console.log('Tamanhos carregados do banco de dados:', this.tamanhos);
             } else {
-                console.warn('Nenhum tamanho encontrado no banco de dados, usando valores padrão');
                 this.tamanhos = this.getTamanhosPadrao();
             }
         } catch (error) {
-            console.error('Erro ao carregar tamanhos:', error);
             this.tamanhos = this.getTamanhosPadrao();
         }
-        
-        // Dados de exemplo para o cardápio (será substituído pelo carregamento real)
-        this.cardapioCache = {
-            data: {
-                tradicionais: [
-                    { id: 1, nome: 'Margherita', descricao: 'Molho de tomate, mussarela, manjericão fresco', preco: 45.90, imagem: 'pizza-margherita.jpg', destaque: true },
-                    // ... outros itens do cardápio
-                    { id: 8, nome: 'Romeu e Julieta', descricao: 'Goiabada, queijo minas, canela', precos: { pequena: 26.90, media: 34.90, grande: 46.90 } }
-                ]
-            }
-        };
         this.adicionais = [
             { id: 1, nome: 'Queijo Extra', descricao: 'Mozzarella adicional', preco: 8.90 },
             { id: 2, nome: 'Bacon', descricao: 'Bacon crocante', preco: 12.90 },
@@ -101,88 +80,111 @@ class CardapioApp {
         this.adicionais = json.adicionais || [];
         this.bebidas = json.bebidas || [];
         this.tamanhos = json.tamanhos || this.getTamanhosPadrao();
-        console.log('Tamanhos carregados remotamente:', this.tamanhos);
+        console.log('Cardápio carregado remotamente');
+    }
+
+    getTamanhosPadrao() {
+        return [
+            { id: 1, nome: 'Pequena', fatias: '6 fatias', icone: '🍕', ativo: true, ordem: 1 },
+            { id: 2, nome: 'Média', fatias: '8 fatias', icone: '🍕🍕', ativo: true, ordem: 2 },
+            { id: 3, nome: 'Grande', fatias: '12 fatias', icone: '🍕🍕🍕', ativo: true, ordem: 3 }
+        ];
     }
 
     setupEventListeners() {
-        // Navegação por stepper
-        document.querySelectorAll('.stepper-step').forEach(stepEl => {
-            stepEl.addEventListener('click', () => {
-                const step = stepEl.dataset.step;
+        // Navegação stepper
+        document.querySelectorAll('.stepper-step').forEach(el => {
+            el.addEventListener('click', () => {
+                const step = el.dataset.step;
                 if (this.canNavigateTo(step)) this.showStep(step);
             });
         });
 
-        // Botões de ação
+        // Botões de navegação
+        document.getElementById('btn-next-modo')?.addEventListener('click', () => this.showStep('modo'));
         document.getElementById('btn-next-sabores')?.addEventListener('click', () => this.showStep('sabores'));
-        document.getElementById('btn-next-addons')?.addEventListener('click', () => this.showStep('adicionais'));
-        document.getElementById('btn-next-endereco')?.addEventListener('click', () => this.showStep('endereco'));
+        document.getElementById('btn-next-quantidade')?.addEventListener('click', () => this.showStep('quantidade'));
+        document.getElementById('btn-next-carrinho')?.addEventListener('click', () => this.addPizzaToCart());
+        document.getElementById('btn-add-more-pizza')?.addEventListener('click', () => this.resetForNewPizza());
+        document.getElementById('btn-skip-more-pizza')?.addEventListener('click', () => this.showStep('adicionais'));
         document.getElementById('btn-next-bebidas')?.addEventListener('click', () => this.showStep('bebidas'));
-        document.getElementById('btn-next-finalizacao')?.addEventListener('click', () => this.showStep('finalizacao'));
+        document.getElementById('btn-next-endereco')?.addEventListener('click', () => this.showStep('endereco'));
+        document.getElementById('btn-skip-endereco')?.addEventListener('click', () => this.showStep('finalizacao'));
+        document.getElementById('btn-salvar-endereco')?.addEventListener('click', () => this.salvarEndereco());
         document.getElementById('btn-finalizar')?.addEventListener('click', () => this.finalizarPedido());
 
-        document.getElementById('btn-salvar-endereco')?.addEventListener('click', () => this.salvarEndereco());
-
-        document.addEventListener('input', (e) => {
-            if (e.target.id === 'cep') this.formatarCEP(e.target);
-            if (e.target.id === 'uf') e.target.value = e.target.value.toUpperCase();
-            if (e.target.id === 'bairro') this.debouncedBuscarBairros(e.target.value);
+        // Botões de voltar
+        document.querySelectorAll('.btn-back').forEach(btn => {
+            btn.addEventListener('click', () => this.goBack());
         });
-        document.getElementById('bairro')?.addEventListener('blur', () => this.onBairroBlur());
 
+        // Tabs de categoria
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                this.renderPizzas(e.target.dataset.category);
+            });
+        });
+
+        // CEP
+        document.getElementById('cep')?.addEventListener('input', (e) => this.formatarCEP(e.target));
+        document.getElementById('bairro')?.addEventListener('input', (e) => this.buscarTaxaBairro(e.target.value));
+
+        // Tabs de endereço
         document.getElementById('tab-addr-list')?.addEventListener('click', () => {
-            document.getElementById('tab-addr-list')?.classList.add('active');
-            document.getElementById('tab-addr-new')?.classList.remove('active');
+            document.getElementById('tab-addr-list').classList.add('active');
+            document.getElementById('tab-addr-new').classList.remove('active');
             document.querySelector('.enderecos-list')?.classList.remove('hidden');
             document.querySelector('.endereco-form')?.classList.add('hidden');
-            this.renderEndereco();
         });
         document.getElementById('tab-addr-new')?.addEventListener('click', () => {
-            document.getElementById('tab-addr-new')?.classList.add('active');
-            document.getElementById('tab-addr-list')?.classList.remove('active');
-            document.querySelector('.endereco-form')?.classList.remove('hidden');
+            document.getElementById('tab-addr-new').classList.add('active');
+            document.getElementById('tab-addr-list').classList.remove('active');
             document.querySelector('.enderecos-list')?.classList.add('hidden');
+            document.querySelector('.endereco-form')?.classList.remove('hidden');
         });
 
-        // Botões voltar
-        document.querySelectorAll('.btn-back').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const currentPanel = e.target.closest('.step-panel');
-                const steps = ['tamanho','sabores','adicionais','endereco','bebidas','finalizacao'];
-                const currentIndex = steps.indexOf(this.currentStep);
-                if (currentIndex > 0) this.showStep(steps[currentIndex - 1]);
-            });
-        });
-
-        // Tabs
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.filterPizzasByCategory(btn.dataset.category);
-            });
-        });
-
-        // Cards
+        // Cliques em cards
         document.addEventListener('click', (e) => {
-            if (e.target.closest('.size-option')) this.selectSize(e.target.closest('.size-option').dataset.sizeId);
+            if (e.target.closest('.size-option')) {
+                const sizeId = e.target.closest('.size-option').dataset.sizeId;
+                this.selectSize(sizeId);
+            }
+            if (e.target.closest('.flavor-mode-option')) {
+                const mode = e.target.closest('.flavor-mode-option').dataset.mode;
+                this.selectFlavorMode(mode);
+            }
+            if (e.target.closest('.quantity-option')) {
+                const qty = e.target.closest('.quantity-option').dataset.qty;
+                this.selectQuantity(qty);
+            }
             if (e.target.closest('.pizza-card')) {
-                const card = e.target.closest('.pizza-card');
-                this.selectPizza(card.dataset.pizzaId, card.dataset.categoria);
+                const pizzaId = e.target.closest('.pizza-card').dataset.pizzaId;
+                const category = e.target.closest('.pizza-card').dataset.categoria;
+                this.togglePizzaFlavor(pizzaId, category);
             }
             if (e.target.closest('.addon-card')) {
-                const card = e.target.closest('.addon-card');
-                this.toggleAddon(card.dataset.addonId);
+                const addonId = e.target.closest('.addon-card').dataset.addonId;
+                this.toggleAddon(addonId);
             }
             if (e.target.closest('.bebida-card')) {
-                const card = e.target.closest('.bebida-card');
-                this.toggleBebida(card.dataset.bebidaId);
+                const bebidaId = e.target.closest('.bebida-card').dataset.bebidaId;
+                this.toggleBebida(bebidaId);
+            }
+            if (e.target.closest('.btn-edit-pizza')) {
+                const idx = e.target.closest('.btn-edit-pizza').dataset.idx;
+                this.editPizza(parseInt(idx));
+            }
+            if (e.target.closest('.btn-remove-pizza')) {
+                const idx = e.target.closest('.btn-remove-pizza').dataset.idx;
+                this.removePizzaFromCart(parseInt(idx));
             }
         });
     }
 
     canNavigateTo(step) {
-        const steps = ['tamanho','sabores','adicionais','endereco','bebidas','finalizacao'];
+        const steps = ['tamanho','modo','sabores','quantidade','carrinho','adicionais','bebidas','endereco','finalizacao'];
         const currentIndex = steps.indexOf(this.currentStep);
         const targetIndex = steps.indexOf(step);
         return targetIndex <= currentIndex + 1;
@@ -195,406 +197,403 @@ class CardapioApp {
         document.getElementById(`step-${step}`)?.classList.add('active');
         document.querySelector(`.stepper-step[data-step="${step}"]`)?.classList.add('active');
         this.renderStepContent(step);
+        this.saveState();
+    }
+
+    goBack() {
+        const steps = ['tamanho','modo','sabores','quantidade','carrinho','adicionais','bebidas','endereco','finalizacao'];
+        const currentIndex = steps.indexOf(this.currentStep);
+        if (currentIndex > 0) {
+            this.showStep(steps[currentIndex - 1]);
+        }
     }
 
     renderStepContent(step) {
-        console.log('Renderizando passo:', step);
         switch (step) {
-            case 'tamanho': 
-                console.log('Chamando renderTamanhos()');
-                this.renderTamanhos(); 
-                break;
+            case 'tamanho': this.renderTamanhos(); break;
+            case 'modo': this.renderFlavorMode(); break;
             case 'sabores': this.renderPizzas(); break;
+            case 'quantidade': this.renderQuantidadeOptions(); break;
+            case 'carrinho': this.renderCarrinho(); break;
             case 'adicionais': this.renderAdicionais(); break;
-            case 'endereco': this.renderEndereco(); break;
             case 'bebidas': this.renderBebidas(); break;
+            case 'endereco': this.renderEndereco(); break;
             case 'finalizacao': this.renderFinalizacao(); break;
         }
     }
 
-    // Retorna os tamanhos padrão caso não consiga carregar do banco
-    getTamanhosPadrao() {
-        return [
-            { id: 1, nome: 'Pequena', fatias: '4 fatias', icone: '🍕', preco_pequeno: 29.90, preco_medio: 0, preco_grande: 0, ativo: true, ordem: 1 },
-            { id: 2, nome: 'Média', fatias: '8 fatias', icone: '🍕🍕', preco_pequeno: 0, preco_medio: 59.90, preco_grande: 0, ativo: true, ordem: 2 },
-            { id: 3, nome: 'Grande', fatias: '12 fatias', icone: '🍕🍕🍕', preco_pequeno: 0, preco_medio: 0, preco_grande: 89.90, ativo: true, ordem: 3 },
-            { id: 4, nome: 'Gigante', fatias: '16 fatias', icone: '🍕🍕🍕🍕', preco_pequeno: 0, preco_medio: 0, preco_grande: 109.90, ativo: true, ordem: 4 }
-        ];
-    }
-
     renderTamanhos() {
-        console.log('=== Iniciando renderTamanhos() ===');
         const container = document.querySelector('.size-options');
-        console.log('Elemento .size-options encontrado?', !!container);
-        
-        if (!container) {
-            console.error('Container de tamanhos não encontrado! Verifique se existe um elemento com a classe "size-options" no DOM.');
-            return;
-        }
-        
-        // Limpa o container primeiro
+        if (!container) return;
         container.innerHTML = '';
         
-        // Ordena os tamanhos pela ordem definida
-        const tamanhosOrdenados = [...this.tamanhos].sort((a, b) => a.ordem - b.ordem);
-        
-        // Adiciona cada tamanho ao container
-        tamanhosOrdenados.forEach(tamanho => {
-            if (!tamanho.ativo) return;
-            
+        this.tamanhos.filter(t => t.ativo).sort((a, b) => a.ordem - b.ordem).forEach(t => {
             const div = document.createElement('div');
-            div.className = 'size-option';
-            div.dataset.sizeId = tamanho.id;
-            div.dataset.sizeName = tamanho.nome.toLowerCase();
-            
-            // Formata o preço para exibição
-            const preco = tamanho.preco_pequeno || tamanho.preco_medio || tamanho.preco_grande;
-            const precoFormatado = preco ? `R$ ${preco.toFixed(2).replace('.', ',')}` : '';
-            
+            div.className = 'size-option' + (this.currentPizza?.tamanho?.id === t.id ? ' selected' : '');
+            div.dataset.sizeId = t.id;
             div.innerHTML = `
-                <div class="size-icon">${tamanho.icone || '🍕'}</div>
-                <div class="size-label">${tamanho.nome}</div>
-                <div class="size-slices">${tamanho.fatias}</div>
-                ${preco ? `<div class="size-price">${precoFormatado}</div>` : ''}
+                <div class="size-icon">${t.icone || '🍕'}</div>
+                <div class="size-label">${t.nome}</div>
+                <div class="size-price">${t.fatias}</div>
             `;
-            
-            div.addEventListener('click', () => this.selectSize(tamanho.id));
             container.appendChild(div);
         });
         
-        // Atualiza a seleção se houver um tamanho já selecionado
-        if (this.selectedSize) {
-            this.selectSize(this.selectedSize);
-        } else if (tamanhosOrdenados.length > 0) {
-            // Seleciona o primeiro tamanho por padrão
-            this.selectSize(tamanhosOrdenados[0].id);
-        }
+        document.getElementById('btn-next-modo').disabled = !this.currentPizza?.tamanho;
+    }
+
+    renderFlavorMode() {
+        const container = document.querySelector('.flavor-mode-options');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const maxSabores = this.getMaxSabores();
+        const modes = [
+            { value: 1, label: '1 Sabor', desc: 'Clássico' },
+            { value: 2, label: 'Meio a Meio', desc: '2 sabores' },
+            ...(maxSabores >= 3 ? [{ value: 3, label: '3 Sabores', desc: 'Especial' }] : [])
+        ];
+
+        modes.forEach(mode => {
+            const div = document.createElement('div');
+            div.className = 'flavor-mode-option' + (this.currentPizza?.flavorMode === mode.value ? ' selected' : '');
+            div.dataset.mode = mode.value;
+            div.innerHTML = `
+                <div class="size-label">${mode.value} Sabor${mode.value > 1 ? 'es' : ''}</div>
+                <div class="size-price" style="font-size: 0.9rem;">${mode.desc}</div>
+            `;
+            container.appendChild(div);
+        });
     }
 
     renderPizzas() {
         const container = document.getElementById('pizza-list');
         if (!container) return;
-        if (!this.cardapioCache || !this.cardapioCache.data) {
-            container.innerHTML = '<div class="empty-state">Nenhum sabor disponível. Verifique o banco de dados.</div>';
+        if (!this.cardapioCache?.data) {
+            container.innerHTML = '<div class="empty-state">Nenhum sabor disponível.</div>';
             return;
         }
-        const categoriaSelecionada = this.selectedPizzas[0]?.categoria || null;
-        const categoriaAtiva = categoriaSelecionada || document.querySelector('.tab-btn.active')?.dataset.category || 'tradicionais';
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelector(`.tab-btn[data-category="${categoriaAtiva}"]`)?.classList.add('active');
-        const pizzas = this.cardapioCache.data[categoriaAtiva] || [];
+
+        const category = document.querySelector('.tab-btn.active')?.dataset.category || 'tradicionais';
+        const pizzas = this.cardapioCache.data[category] || [];
+        
         if (!pizzas.length) {
             container.innerHTML = '<div class="empty-state">Nenhum sabor nesta categoria.</div>';
             return;
         }
-        container.innerHTML = pizzas.map(p => `
-            <div class="pizza-card" data-pizza-id="${p.id}" data-categoria="${categoriaAtiva}">
+
+        const tamanhoId = this.currentPizza?.tamanho?.id;
+        let precoKey = 'pequena';
+        if (tamanhoId === 2) precoKey = 'media';
+        else if (tamanhoId === 3) precoKey = 'grande';
+
+        container.innerHTML = pizzas.map(p => {
+            const preco = p.precos && p.precos[precoKey] ? p.precos[precoKey] : 0;
+            return `
+            <div class="pizza-card" data-pizza-id="${p.id}" data-categoria="${category}">
                 <div class="pizza-name">${p.nome}</div>
                 <div class="pizza-description">${p.descricao}</div>
-                <div class="pizza-price-display">R$ ${(p.precos[this.selectedSize] || 0).toFixed(2)}</div>
+                <div class="pizza-price-display">R$ ${preco.toFixed(2).replace('.', ',')}</div>
             </div>
-        `).join('');
-        const maxSabores = this.getMaxSabores();
-        const saboresSelecionados = Array.isArray(this.selectedPizzas[0]?.sabores) ? this.selectedPizzas[0].sabores : [];
-        const selectedIds = new Set(saboresSelecionados.map(s => String(s.id)));
-        container.querySelectorAll('.pizza-card').forEach(card => {
-            if (selectedIds.has(card.dataset.pizzaId)) card.classList.add('selected');
-        });
-        const hint = document.getElementById('sabores-hint');
-        if (hint) hint.textContent = `Sabores selecionados: ${saboresSelecionados.length} / ${maxSabores}`;
-        if (saboresSelecionados.length > 0) document.getElementById('btn-next-addons')?.removeAttribute('disabled');
+        `;
+        }).join('');
+
+        // Marca as pizzas já selecionadas
+        if (this.currentPizza?.sabores) {
+            this.currentPizza.sabores.forEach(s => {
+                document.querySelector(`[data-pizza-id="${s.id}"]`)?.classList.add('selected');
+            });
+        }
+
+        const maxSabores = this.currentPizza?.flavorMode || 1;
+        const selecionados = this.currentPizza?.sabores?.length || 0;
+        document.getElementById('sabores-hint').textContent = `Sabores selecionados: ${selecionados} / ${maxSabores}`;
+        
+        document.getElementById('btn-next-quantidade').disabled = selecionados === 0;
+    }
+
+    renderQuantidadeOptions() {
+        const container = document.querySelector('.quantity-options');
+        if (!container) return;
+        container.innerHTML = '';
+
+        for (let i = 1; i <= 5; i++) {
+            const div = document.createElement('div');
+            div.className = 'quantity-option' + (this.currentPizza?.quantidade === i ? ' selected' : '');
+            div.dataset.qty = i;
+            div.innerHTML = `<div class="size-label">${i} ${i === 1 ? 'Pizza' : 'Pizzas'}</div>`;
+            container.appendChild(div);
+        }
+    }
+
+    renderCarrinho() {
+        const container = document.querySelector('.cart-items');
+        if (!container) return;
+        
+        if (this.pizzasCart.length === 0) {
+            container.innerHTML = '<p style="color: #6b7280;">Nenhuma pizza adicionada ainda.</p>';
+            return;
+        }
+
+        container.innerHTML = this.pizzasCart.map((pizza, idx) => {
+            const flavorNames = pizza.sabores.map(s => s.nome).join(' + ');
+            const precoUnitario = this.getPizzaPrice(pizza);
+            return `
+                <div class="cart-item-card">
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${pizza.quantidade}x ${pizza.tamanho.nome}</div>
+                        <div class="cart-item-flavors">${flavorNames}</div>
+                    </div>
+                    <div class="cart-item-price">R$ ${(precoUnitario * pizza.quantidade).toFixed(2).replace('.', ',')}</div>
+                    <div class="cart-item-actions">
+                        <button class="btn btn-secondary btn-edit-pizza" data-idx="${idx}">Editar</button>
+                        <button class="btn btn-secondary btn-remove-pizza" data-idx="${idx}">Remover</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
     renderAdicionais() {
         const container = document.querySelector('.addons-grid');
         if (!container) return;
-        if (!Array.isArray(this.adicionais) || this.adicionais.length === 0) {
+        if (!this.adicionais.length) {
             container.innerHTML = '<div class="empty-state">Nenhum adicional disponível.</div>';
             return;
         }
+
         container.innerHTML = this.adicionais.map(a => `
-            <div class="addon-card" data-addon-id="${a.id}">
+            <div class="addon-card ${this.selectedAddons.some(x => x.id === a.id) ? 'selected' : ''}" data-addon-id="${a.id}">
                 <div class="addon-name">${a.nome}</div>
                 <div class="addon-description">${a.descricao}</div>
-                <div class="addon-price">R$ ${a.preco.toFixed(2)}</div>
+                <div class="addon-price">R$ ${a.preco.toFixed(2).replace('.', ',')}</div>
             </div>
         `).join('');
-        const selectedIds = new Set(this.selectedAddons.map(a => String(a.id)));
-        container.querySelectorAll('.addon-card').forEach(card => {
-            if (selectedIds.has(card.dataset.addonId)) card.classList.add('selected');
-        });
-        if (this.selectedAddons.length || this.selectedPizzas.length) {
-            document.getElementById('btn-next-endereco')?.removeAttribute('disabled');
-        }
-    }
-
-    async renderEndereco() {
-        const list = document.querySelector('.enderecos-list');
-        if (!list) return;
-        list.innerHTML = 'Carregando endereços...';
-        try {
-            const res = await fetch('../api/enderecos.php?action=list');
-            const data = await res.json();
-            if (data.success && Array.isArray(data.data) && data.data.length) {
-                list.innerHTML = data.data.map(e => `
-                    <label class="endereco-item">
-                        <input type="radio" name="endereco" value="${e.id}" ${this.selectedEnderecoId==e.id?'checked':''}>
-                        <span>${e.logradouro}, ${e.numero} - ${e.bairro} - ${e.cidade}/${e.uf} - ${e.cep}</span>
-                    </label>
-                `).join('');
-                list.querySelectorAll('input[name="endereco"]').forEach(r => {
-                    r.addEventListener('change', (ev) => {
-                        this.selectedEnderecoId = parseInt(ev.target.value, 10);
-                        this.saveState();
-                    });
-                });
-            } else {
-                list.innerHTML = 'Nenhum endereço cadastrado. Preencha o formulário para adicionar.';
-            }
-        } catch (err) {
-            list.innerHTML = 'Erro ao carregar endereços.';
-        }
     }
 
     renderBebidas() {
         const container = document.querySelector('.bebidas-grid');
         if (!container) return;
-        if (!Array.isArray(this.bebidas) || this.bebidas.length === 0) {
+        if (!this.bebidas.length) {
             container.innerHTML = '<div class="empty-state">Nenhuma bebida disponível.</div>';
             return;
         }
+
         container.innerHTML = this.bebidas.map(b => `
-            <div class="bebida-card" data-bebida-id="${b.id}">
+            <div class="bebida-card ${this.selectedBebidas.some(x => x.id === b.id) ? 'selected' : ''}" data-bebida-id="${b.id}">
                 <div class="bebida-name">${b.nome}</div>
-                <div class="bebida-price">R$ ${b.preco.toFixed(2)}</div>
+                <div class="bebida-price">R$ ${b.preco.toFixed(2).replace('.', ',')}</div>
             </div>
         `).join('');
-        const selectedIds = new Set(this.selectedBebidas.map(b => String(b.id)));
-        container.querySelectorAll('.bebida-card').forEach(card => {
-            if (selectedIds.has(card.dataset.bebidaId)) card.classList.add('selected');
-        });
-        const btn = document.getElementById('btn-next-finalizacao');
-        if (btn) {
-            if (this.selectedBebidas.length === 0 && this.selectedPizzas.length === 0 && this.selectedAddons.length === 0) {
-                btn.setAttribute('disabled', 'true');
+    }
+
+    async renderEndereco() {
+        const list = document.querySelector('.enderecos-list');
+        if (!list) return;
+        list.innerHTML = 'Carregando...';
+        try {
+            const res = await fetch('../api/enderecos.php?action=list');
+            const data = await res.json();
+            if (data.success && data.data?.length) {
+                list.innerHTML = data.data.map(e => `
+                    <label class="endereco-item">
+                        <input type="radio" name="endereco" value="${e.id}" ${this.selectedEnderecoId === e.id ? 'checked' : ''}>
+                        <span>${e.logradouro}, ${e.numero} - ${e.bairro}</span>
+                    </label>
+                `).join('');
+                list.querySelectorAll('input').forEach(r => {
+                    r.addEventListener('change', (e) => {
+                        this.selectedEnderecoId = parseInt(e.target.value);
+                        this.saveState();
+                    });
+                });
             } else {
-                btn.removeAttribute('disabled');
+                list.innerHTML = 'Nenhum endereço. Preencha o formulário.';
             }
+        } catch (e) {
+            list.innerHTML = 'Erro ao carregar endereços.';
         }
     }
 
     renderFinalizacao() {
         const container = document.querySelector('.finalizacao-content');
         if (!container) return;
-        const total = [
-            ...this.selectedPizzas.map(p => p.preco),
-            ...this.selectedAddons.map(a => a.preco),
-            ...this.selectedBebidas.map(b => b.preco * (b.quantidade || 1))
-        ].reduce((a,b)=>a+b,0);
-        const itens = [
-            ...this.selectedPizzas.map(p => `
-                <div class="item-row">
-                    <div class="item-name">Pizza (${p.tamanho})${Array.isArray(p.sabores)&&p.sabores.length? ' - ' + p.sabores.map(s=>s.nome).join(' + ') : ''}</div>
-                    <div class="item-actions">
-                        <button class="btn btn-secondary" data-action="remove-pizza" data-id="pizza">Remover</button>
-                    </div>
-                    <div class="item-price">R$ ${p.preco.toFixed(2)}</div>
-                </div>`),
-            ...this.selectedAddons.map(a => `
-                <div class="item-row">
-                    <div class="item-name">${a.nome}</div>
-                    <div class="item-actions">
-                        <button class="btn btn-secondary" data-action="remove-addon" data-id="${a.id}">Remover</button>
-                    </div>
-                    <div class="item-price">R$ ${a.preco.toFixed(2)}</div>
-                </div>`),
-            ...this.selectedBebidas.map(b => `
-                <div class="item-row">
-                    <div class="item-name">${b.nome}</div>
-                    <div class="item-actions">
-                        <div class="qty-group">
-                            <button class="qty-btn" data-action="dec-bebida" data-id="${b.id}">-</button>
-                            <span>${b.quantidade || 1}</span>
-                            <button class="qty-btn" data-action="inc-bebida" data-id="${b.id}">+</button>
-                        </div>
-                        <button class="btn btn-secondary" data-action="remove-bebida" data-id="${b.id}">Remover</button>
-                    </div>
-                    <div class="item-price">R$ ${(b.preco * (b.quantidade || 1)).toFixed(2)}</div>
-                </div>`)
-        ].join('');
-        const enderecoInfo = this.selectedEnderecoId ? `Endereço selecionado: #${this.selectedEnderecoId}` : 'Selecione um endereço na etapa anterior';
-        container.innerHTML = `
-            <div class="review-section">
-                <h3>Itens</h3>
-                <div class="review-card">${itens || '<div class="item-row"><div class="item-name">Nenhum item</div><div></div><div></div></div>'}</div>
-                <div class="review-total-row">
-                    <div>Total</div>
-                    <div class="item-price">R$ ${total.toFixed(2)}</div>
-                </div>
+
+        const pizzasTotal = this.pizzasCart.reduce((t, p) => t + (this.getPizzaPrice(p) * p.quantidade), 0);
+        const adicionaisTotal = this.selectedAddons.reduce((t, a) => t + a.preco, 0);
+        const bebidasTotal = this.selectedBebidas.reduce((t, b) => t + (b.preco * (b.quantidade || 1)), 0);
+        const total = pizzasTotal + adicionaisTotal + bebidasTotal + (this.taxaEntrega || 0);
+
+        let html = '<div class="review-section"><h3>Itens</h3><div class="review-card">';
+        
+        html += this.pizzasCart.map((p, idx) => `
+            <div class="item-row">
+                <div class="item-name">${p.quantidade}x ${p.tamanho.nome} - ${p.sabores.map(s => s.nome).join(' + ')}</div>
+                <div class="item-price">R$ ${(this.getPizzaPrice(p) * p.quantidade).toFixed(2).replace('.', ',')}</div>
             </div>
-            <div class="review-section">
-                <h3>Entrega</h3>
-                <div class="address-summary review-address">${enderecoInfo}</div>
-                <div class="address-actions">
-                    <button class="btn btn-secondary" id="btn-alterar-endereco">Alterar endereço</button>
-                </div>
-                ${this.taxaEntrega ? `<div class="address-summary">Taxa de entrega estimada: R$ ${this.taxaEntrega.toFixed(2)}</div>` : ''}
+        `).join('');
+
+        html += this.selectedAddons.map(a => `
+            <div class="item-row">
+                <div class="item-name">${a.nome}</div>
+                <div class="item-price">R$ ${a.preco.toFixed(2).replace('.', ',')}</div>
             </div>
-            <div class="review-section">
-                <h3>Pagamento</h3>
-                <div class="payment-cards">
-                    <label class="payment-card ${this.paymentMethod==='pix'?'selected':''}">
-                        <input type="radio" name="payment" value="pix" ${this.paymentMethod==='pix'?'checked':''}>
-                        <span>PIX</span>
-                    </label>
-                    <label class="payment-card ${this.paymentMethod==='cartao'?'selected':''}">
-                        <input type="radio" name="payment" value="cartao" ${this.paymentMethod==='cartao'?'checked':''}>
-                        <span>Cartão (apenas na entrega)</span>
-                    </label>
-                </div>
+        `).join('');
+
+        html += this.selectedBebidas.map(b => `
+            <div class="item-row">
+                <div class="item-name">${b.quantidade || 1}x ${b.nome}</div>
+                <div class="item-price">R$ ${(b.preco * (b.quantidade || 1)).toFixed(2).replace('.', ',')}</div>
             </div>
-            <button class="btn btn-success btn-full" id="btn-finalizar">Confirmar Pedido</button>
-        `;
-        if (this.selectedEnderecoId) {
-            try {
-                fetch(`../api/enderecos.php?action=get&id=${this.selectedEnderecoId}`)
-                    .then(r => r.json())
-                    .then(j => {
-                        if (j.success && j.data) {
-                            const e = j.data;
-                            const info = `${e.logradouro}, ${e.numero} ${e.complemento?'- '+e.complemento:''} - ${e.bairro} - Guarapari/ES - ${e.cep}`;
-                            const el = container.querySelector('.review-address');
-                            if (el) el.textContent = info;
-                        }
-                    })
-                    .catch(() => {});
-            } catch {}
-        }
-        container.querySelectorAll('input[name="payment"]').forEach(r => {
-            r.addEventListener('change', (e) => {
-                this.paymentMethod = e.target.value;
-                this.saveState();
-                container.querySelectorAll('.payment-card').forEach(c => c.classList.remove('selected'));
-                e.target.closest('.payment-card')?.classList.add('selected');
-            });
-        });
-        container.querySelector('#btn-alterar-endereco')?.addEventListener('click', () => {
-            this.showStep('endereco');
-        });
-        container.querySelectorAll('button[data-action]')?.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const action = btn.dataset.action;
-                const id = btn.dataset.id;
-                if (!action || !id) return;
-                if (action === 'remove-pizza') {
-                    this.selectedPizzas = this.selectedPizzas.filter(p => String(p.id) !== String(id));
-                } else if (action === 'remove-addon') {
-                    this.selectedAddons = this.selectedAddons.filter(a => String(a.id) !== String(id));
-                } else if (action === 'remove-bebida') {
-                    this.selectedBebidas = this.selectedBebidas.filter(b => String(b.id) !== String(id));
-                } else if (action === 'inc-bebida') {
-                    const item = this.selectedBebidas.find(b => String(b.id) === String(id));
-                    if (item) item.quantidade = (item.quantidade || 1) + 1;
-                } else if (action === 'dec-bebida') {
-                    const item = this.selectedBebidas.find(b => String(b.id) === String(id));
-                    if (item && (item.quantidade || 1) > 1) item.quantidade = (item.quantidade || 1) - 1;
-                }
-                this.updateOrderSummary();
-                this.saveState();
-                this.renderFinalizacao();
-            });
-        });
-        document.getElementById('btn-finalizar')?.addEventListener('click', () => this.finalizarPedido());
+        `).join('');
+
+        html += `
+            </div>
+            <div class="review-total-row">
+                <div>Total</div>
+                <div class="item-price">R$ ${total.toFixed(2).replace('.', ',')}</div>
+            </div>
+        </div>`;
+
+        container.innerHTML = html;
     }
 
+    // MÉTODOS DE SELEÇÃO
     selectSize(sizeId) {
-        const tamanho = this.tamanhos.find(t => t.id === sizeId || t.id.toString() === sizeId.toString());
-        if (!tamanho) {
-            console.error('Tamanho não encontrado:', sizeId);
-            return;
-        }
+        const tamanho = this.tamanhos.find(t => t.id === parseInt(sizeId));
+        if (!tamanho) return;
         
-        this.selectedSize = {
-            id: tamanho.id,
-            nome: tamanho.nome,
-            fatias: tamanho.fatias,
-            preco: tamanho.preco_pequeno || tamanho.preco_medio || tamanho.preco_grande || 0
-        };
+        if (!this.currentPizza) this.currentPizza = {};
+        this.currentPizza.tamanho = { id: tamanho.id, nome: tamanho.nome, fatias: tamanho.fatias };
         
-        // Atualiza a UI
         document.querySelectorAll('.size-option').forEach(el => {
-            const optionSizeId = el.dataset.sizeId || '';
-            el.classList.toggle('selected', optionSizeId === sizeId.toString());
+            el.classList.toggle('selected', el.dataset.sizeId === sizeId.toString());
         });
         
-        // Habilita o botão de próximo se estiver no passo de seleção de tamanho
-        if (this.currentStep === 'tamanho') {
-            const nextButton = document.getElementById('btn-next-sabores');
-            if (nextButton) {
-                nextButton.disabled = false;
-            }
-        }
-        
-        // Atualiza o resumo do pedido
-        this.updateOrderSummary();
+        document.getElementById('btn-next-modo').disabled = false;
         this.saveState();
-        
-        console.log('Tamanho selecionado:', this.selectedSize);
     }
 
-    selectPizza(id, categoria) {
-        if (!this.selectedSize) {
-            this.showError('Selecione um tamanho antes de escolher o sabor.');
-            return;
-        }
-        const pizza = this.cardapioCache.data[categoria]?.find(p => p.id == id);
+    selectFlavorMode(mode) {
+        if (!this.currentPizza) this.currentPizza = {};
+        this.currentPizza.flavorMode = parseInt(mode);
+        this.currentPizza.sabores = [];
+        
+        document.querySelectorAll('.flavor-mode-option').forEach(el => {
+            el.classList.toggle('selected', el.dataset.mode === mode.toString());
+        });
+        
+        document.getElementById('btn-next-sabores').disabled = false;
+        this.renderPizzas();
+        this.saveState();
+    }
+
+    togglePizzaFlavor(pizzaId, category) {
+        if (!this.currentPizza) return;
+        const pizzas = this.cardapioCache?.data[category] || [];
+        const pizza = pizzas.find(p => p.id == pizzaId);
         if (!pizza) return;
-        const maxSabores = this.getMaxSabores();
-        let composite = this.selectedPizzas[0];
-        if (!composite || !Array.isArray(composite.sabores)) {
-            composite = { nome: 'Pizza', tamanho: this.selectedSize, preco: 0, sabores: [], categoria };
-        }
-        const idx = composite.sabores.findIndex(s => s.id == pizza.id);
+
+        const maxFlavors = this.currentPizza.flavorMode || 1;
+        const idx = this.currentPizza.sabores.findIndex(s => s.id == pizzaId);
+
         if (idx >= 0) {
-            composite.sabores.splice(idx, 1);
+            this.currentPizza.sabores.splice(idx, 1);
         } else {
-            if (composite.sabores.length >= maxSabores) {
-                this.showError(`Você pode escolher até ${maxSabores} sabores.`);
+            if (this.currentPizza.sabores.length >= maxFlavors) {
+                this.showError(`Máximo ${maxFlavors} sabor${maxFlavors > 1 ? 'es' : ''}`);
                 return;
             }
-            composite.sabores.push({ id: pizza.id, nome: pizza.nome, precos: pizza.precos, categoria });
+            this.currentPizza.sabores.push({ id: pizza.id, nome: pizza.nome, precos: pizza.precos });
         }
-        composite.tamanho = this.selectedSize;
-        composite.preco = composite.sabores.reduce((max, s) => Math.max(max, (s.precos[this.selectedSize] || 0)), 0);
-        this.selectedPizzas = composite.sabores.length ? [composite] : [];
-        document.querySelectorAll('.pizza-card').forEach(c => c.classList.remove('selected'));
-        composite.sabores.forEach(s => {
-            document.querySelector(`[data-pizza-id="${s.id}"]`)?.classList.add('selected');
-        });
-        const hint = document.getElementById('sabores-hint');
-        if (hint) hint.textContent = `Sabores selecionados: ${composite.sabores.length} / ${maxSabores}`;
-        if (composite.sabores.length > 0) {
-            document.getElementById('btn-next-addons')?.removeAttribute('disabled');
-        } else {
-            document.getElementById('btn-next-addons')?.setAttribute('disabled', 'true');
-        }
-        this.updateOrderSummary();
+
+        this.renderPizzas();
         this.saveState();
     }
 
+    selectQuantity(qty) {
+        if (!this.currentPizza) return;
+        this.currentPizza.quantidade = parseInt(qty);
+        
+        document.querySelectorAll('.quantity-option').forEach(el => {
+            el.classList.toggle('selected', el.dataset.qty === qty.toString());
+        });
+        
+        this.saveState();
+    }
+
+    // OPERAÇÕES DO CARRINHO
+    addPizzaToCart() {
+        if (!this.currentPizza || !this.currentPizza.sabores.length) {
+            this.showError('Selecione sabores primeiro');
+            return;
+        }
+        if (!this.currentPizza.quantidade) {
+            this.showError('Selecione a quantidade');
+            return;
+        }
+
+        this.pizzasCart.push({ ...this.currentPizza });
+        this.showSuccess('Pizza adicionada ao carrinho!');
+        this.resetForNewPizza();
+        this.showStep('carrinho');
+    }
+
+    resetForNewPizza() {
+        this.currentPizza = null;
+        this.showStep('tamanho');
+    }
+
+    editPizza(idx) {
+        if (idx < 0 || idx >= this.pizzasCart.length) return;
+        this.currentPizza = { ...this.pizzasCart[idx] };
+        this.pizzasCart.splice(idx, 1);
+        this.showStep('tamanho');
+    }
+
+    removePizzaFromCart(idx) {
+        if (idx < 0 || idx >= this.pizzasCart.length) return;
+        this.pizzasCart.splice(idx, 1);
+        this.showSuccess('Pizza removida');
+        if (this.pizzasCart.length === 0) {
+            this.resetForNewPizza();
+        } else {
+            this.renderCarrinho();
+        }
+        this.saveState();
+    }
+
+    // HELPERS
+    getMaxSabores() {
+        const tamanho = this.currentPizza?.tamanho;
+        if (!tamanho) return 1;
+        if (tamanho.id === 3) return 3;
+        if (tamanho.id === 2) return 2;
+        return 1;
+    }
+
+    getPizzaPrice(pizza) {
+        if (!pizza.sabores.length) return 0;
+        const tamanhoId = pizza.tamanho.id;
+        let priceKey = 'pequena';
+        if (tamanhoId === 2) priceKey = 'media';
+        else if (tamanhoId === 3) priceKey = 'grande';
+        
+        const maxPrice = Math.max(...pizza.sabores.map(s => s.precos[priceKey] || 0));
+        return maxPrice;
+    }
+
+    // ADICIONAIS E BEBIDAS
     toggleAddon(id) {
         const addon = this.adicionais.find(a => a.id == id);
         if (!addon) return;
         const idx = this.selectedAddons.findIndex(a => a.id == id);
-        const card = document.querySelector(`[data-addon-id="${id}"]`);
         if (idx >= 0) {
             this.selectedAddons.splice(idx, 1);
-            card?.classList.remove('selected');
         } else {
             this.selectedAddons.push(addon);
-            card?.classList.add('selected');
         }
-        this.updateOrderSummary();
+        this.renderAdicionais();
         this.saveState();
     }
 
@@ -602,105 +601,42 @@ class CardapioApp {
         const bebida = this.bebidas.find(b => b.id == id);
         if (!bebida) return;
         const idx = this.selectedBebidas.findIndex(b => b.id == id);
-        const card = document.querySelector(`[data-bebida-id="${id}"]`);
         if (idx >= 0) {
             this.selectedBebidas.splice(idx, 1);
-            card?.classList.remove('selected');
         } else {
             this.selectedBebidas.push({ ...bebida, quantidade: 1 });
-            card?.classList.add('selected');
         }
-        this.updateOrderSummary();
+        this.renderBebidas();
         this.saveState();
     }
 
-    getMaxSabores() {
-        switch (this.selectedSize) {
-            case 'pequena': return 2;
-            case 'media': return 2;
-            case 'grande': return 3;
-            default: return 1;
-        }
-    }
-
-    filterPizzasByCategory(categoria) {
-        document.querySelectorAll('.pizza-card').forEach(card => {
-            card.style.display = (card.dataset.categoria === categoria) ? 'block' : 'none';
-        });
-    }
-
-    updateOrderSummary() {
-        const total = [
-            ...this.selectedPizzas.map(p => p.preco),
-            ...this.selectedAddons.map(a => a.preco),
-            ...this.selectedBebidas.map(b => b.preco * (b.quantidade || 1))
-        ].reduce((a, b) => a + b, 0);
-        const count = this.selectedPizzas.length + this.selectedAddons.length + this.selectedBebidas.length;
-        const countEl = document.getElementById('cart-count');
-        const totalEl = document.getElementById('cart-total');
-        if (countEl) countEl.textContent = String(count);
-        if (totalEl) totalEl.textContent = total.toFixed(2);
-    }
-
-    toggleCart() {
-        document.getElementById('cart-panel')?.classList.toggle('open');
-    }
-
-    closeCart() {
-        document.getElementById('cart-panel')?.classList.remove('open');
-    }
-
-    finalizarPedido() {
-        if (!this.selectedEnderecoId) {
-            this.showError('Selecione ou cadastre um endereço para entrega.');
-            this.showStep('endereco');
-            return;
-        }
-        if (this.paymentMethod === 'cartao') {
-            this.showSuccess('Pagamento será realizado na entrega com cartão.');
-        }
-        this.showSuccess('Pedido confirmado!');
-        setTimeout(() => {
-            this.selectedPizzas = [];
-            this.selectedAddons = [];
-            this.selectedBebidas = [];
-            this.selectedSize = null;
-            this.selectedEnderecoId = null;
-            this.paymentMethod = 'pix';
-            sessionStorage.removeItem('cardapioState');
-            this.showStep('tamanho');
-            this.updateOrderSummary();
-            this.closeCart();
-        }, 2000);
-    }
-
+    // ENDEREÇO
     async salvarEndereco() {
         const cep = document.getElementById('cep')?.value?.trim();
         const logradouro = document.getElementById('logradouro')?.value?.trim();
         const numero = document.getElementById('numero')?.value?.trim();
-        const complemento = document.getElementById('complemento')?.value?.trim();
         const bairro = document.getElementById('bairro')?.value?.trim();
-        const cidade = 'Guarapari';
-        const uf = 'ES';
+
         if (!cep || !logradouro || !numero || !bairro) {
-            this.showError('Preencha todos os campos obrigatórios.');
+            this.showError('Preencha todos os campos');
             return;
         }
-        const apelido = `${logradouro} ${numero}`.trim();
-        const payload = { apelido, cep, logradouro, numero, complemento, bairro, cidade, uf, padrao: 0 };
+
         try {
-            const res = await fetch('../api/enderecos.php?action=add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const res = await fetch('../api/enderecos.php?action=add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ apelido: `${logradouro} ${numero}`, cep, logradouro, numero, bairro, cidade: 'Guarapari', uf: 'ES', padrao: 0 })
+            });
             const data = await res.json();
             if (data.success) {
-                this.selectedEnderecoId = data.data?.id || null;
-                this.showSuccess('Endereço salvo.');
+                this.selectedEnderecoId = data.data?.id;
+                this.showSuccess('Endereço salvo');
                 this.renderEndereco();
                 this.saveState();
-            } else {
-                this.showError(data.message || 'Erro ao salvar endereço');
             }
         } catch (e) {
-            this.showError('Erro ao salvar endereço');
+            this.showError('Erro ao salvar');
         }
     }
 
@@ -715,19 +651,51 @@ class CardapioApp {
             const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
             const data = await res.json();
             if (!data.erro) {
-                const logradouro = document.getElementById('logradouro');
-                const bairro = document.getElementById('bairro');
-                if (logradouro && data.logradouro) logradouro.value = data.logradouro;
-                if (bairro && data.bairro) bairro.value = data.bairro;
+                if (data.logradouro) document.getElementById('logradouro').value = data.logradouro;
+                if (data.bairro) document.getElementById('bairro').value = data.bairro;
             }
         } catch (e) {}
     }
 
+    async buscarTaxaBairro(bairro) {
+        if (!bairro) return;
+        try {
+            const res = await fetch(`../api/enderecos.php?action=taxa&bairro=${encodeURIComponent(bairro)}`);
+            const j = await res.json();
+            this.taxaEntrega = typeof j.taxa === 'number' ? j.taxa : 1.00;
+            this.saveState();
+        } catch (e) {}
+    }
+
+    // FINALIZAÇÃO
+    async finalizarPedido() {
+        if (!this.selectedEnderecoId) {
+            this.showError('Selecione um endereço');
+            this.showStep('endereco');
+            return;
+        }
+        if (this.pizzasCart.length === 0) {
+            this.showError('Adicione pizzas ao pedido');
+            return;
+        }
+
+        this.showSuccess('Pedido confirmado!');
+        setTimeout(() => {
+            this.pizzasCart = [];
+            this.selectedAddons = [];
+            this.selectedBebidas = [];
+            this.currentPizza = null;
+            sessionStorage.removeItem('cardapioState');
+            location.reload();
+        }, 2000);
+    }
+
+    // STATE
     saveState() {
         const state = {
             currentStep: this.currentStep,
-            selectedSize: this.selectedSize,
-            selectedPizzas: this.selectedPizzas,
+            pizzasCart: this.pizzasCart,
+            currentPizza: this.currentPizza,
             selectedAddons: this.selectedAddons,
             selectedBebidas: this.selectedBebidas,
             selectedEnderecoId: this.selectedEnderecoId,
@@ -742,34 +710,15 @@ class CardapioApp {
         if (!raw) return;
         try {
             const s = JSON.parse(raw);
-            this.currentStep = s.currentStep || this.currentStep;
-            this.selectedSize = s.selectedSize || this.selectedSize;
-            this.selectedPizzas = Array.isArray(s.selectedPizzas)?s.selectedPizzas:[];
-            this.selectedAddons = Array.isArray(s.selectedAddons)?s.selectedAddons:[];
-            this.selectedBebidas = Array.isArray(s.selectedBebidas)?s.selectedBebidas:[];
+            this.currentStep = s.currentStep || 'tamanho';
+            this.pizzasCart = s.pizzasCart || [];
+            this.currentPizza = s.currentPizza || null;
+            this.selectedAddons = s.selectedAddons || [];
+            this.selectedBebidas = s.selectedBebidas || [];
             this.selectedEnderecoId = s.selectedEnderecoId || null;
             this.paymentMethod = s.paymentMethod || 'pix';
-            this.taxaEntrega = typeof s.taxaEntrega === 'number' ? s.taxaEntrega : null;
+            this.taxaEntrega = s.taxaEntrega || null;
         } catch(e) {}
-    }
-
-    async buscarTaxaBairro(bairro) {
-        const el = document.getElementById('taxa-info');
-        if (!el) return;
-        const b = String(bairro || '').trim();
-        if (!b) { el.textContent = ''; this.taxaEntrega = null; this.saveState(); return; }
-        try {
-            const res = await fetch(`../api/enderecos.php?action=taxa&bairro=${encodeURIComponent(b)}`);
-            const j = await res.json();
-            const taxa = typeof j.taxa === 'number' ? j.taxa : 1.00;
-            this.taxaEntrega = taxa;
-            el.textContent = `Taxa de entrega para ${b}: R$ ${taxa.toFixed(2)}`;
-            this.saveState();
-        } catch (e) {
-            this.taxaEntrega = 1.00;
-            el.textContent = `Taxa de entrega para ${b}: R$ 1,00`;
-            this.saveState();
-        }
     }
 
     showError(msg) {
@@ -787,29 +736,9 @@ class CardapioApp {
     }
 }
 
-// Inicialização
+// INICIALIZAÇÃO
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM carregado, inicializando CardapioApp...');
     const app = new CardapioApp();
-    
-    // Tenta restaurar o estado e inicializar
-    try {
-        app.restoreState();
-        app.init().catch(error => {
-            console.error('Erro ao inicializar:', error);
-            // Tenta carregar dados locais em caso de falha
-            app.carregarDadosLocais();
-            app.renderTamanhos();
-        });
-    } catch (error) {
-        console.error('Erro crítico:', error);
-        app.carregarDadosLocais();
-        app.renderTamanhos();
-    }
     app.init();
     window.cardapioApp = app;
-    window.toggleCart = () => window.cardapioApp?.toggleCart();
-    window.closeCart = () => window.cardapioApp?.closeCart();
-    window.finalizarPedido = () => window.cardapioApp?.finalizarPedido();
 });
-

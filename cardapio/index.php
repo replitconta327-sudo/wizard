@@ -14,8 +14,7 @@ if (session_status() === PHP_SESSION_NONE) {
     <link href="../assets/css/style.css" rel="stylesheet">
     <link href="../assets/css/pages/cardapio.css" rel="stylesheet">
     <style>
-    /* Estilos corrigidos para os tamanhos */
-    .size-options {
+    .size-options, .flavor-mode-options, .quantity-options {
         display: grid !important;
         grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
         gap: 1.5rem !important;
@@ -23,7 +22,7 @@ if (session_status() === PHP_SESSION_NONE) {
         max-width: 600px !important;
         margin: 0 auto !important;
     }
-    .size-option {
+    .size-option, .flavor-mode-option, .quantity-option {
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
@@ -35,32 +34,39 @@ if (session_status() === PHP_SESSION_NONE) {
         text-align: center !important;
         cursor: pointer !important;
         transition: all 0.2s ease !important;
-        min-height: 120px !important;
+        min-height: 100px !important;
     }
-    .size-option:hover {
+    .size-option:hover, .flavor-mode-option:hover, .quantity-option:hover {
         border-color: #dc2626 !important;
         transform: translateY(-2px) !important;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
     }
-    .size-option.selected {
+    .size-option.selected, .flavor-mode-option.selected, .quantity-option.selected {
         border-color: #dc2626 !important;
         background: #fef2f2 !important;
         box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15) !important;
     }
-    .size-icon {
-        font-size: 2rem !important;
-        margin-bottom: 0.75rem !important;
+    .size-icon { font-size: 2rem !important; margin-bottom: 0.75rem !important; }
+    .size-label { font-weight: 600 !important; font-size: 1.1rem !important; color: #111827 !important; margin-bottom: 0.25rem !important; }
+    .size-price { color: #6b7280 !important; font-size: 0.9rem !important; }
+    .cart-items { margin-top: 1.5rem; }
+    .cart-item-card {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
-    .size-label {
-        font-weight: 600 !important;
-        font-size: 1.1rem !important;
-        color: #111827 !important;
-        margin-bottom: 0.25rem !important;
-    }
-    .size-price {
-        color: #6b7280 !important;
-        font-size: 0.9rem !important;
-    }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-weight: 600; color: #111827; }
+    .cart-item-flavors { font-size: 0.9rem; color: #6b7280; margin-top: 0.25rem; }
+    .cart-item-price { font-weight: 600; color: #dc2626; margin-right: 1rem; }
+    .cart-item-actions { display: flex; gap: 0.5rem; }
+    .btn-edit-pizza { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
+    .btn-remove-pizza { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -76,22 +82,38 @@ if (session_status() === PHP_SESSION_NONE) {
             
             <div class="stepper">
                 <div class="stepper-step active" data-step="tamanho">1. Tamanho</div>
-                <div class="stepper-step" data-step="sabores">2. Sabores</div>
-                <div class="stepper-step" data-step="adicionais">3. Adicionais</div>
-                <div class="stepper-step" data-step="endereco">4. Endereço</div>
-                <div class="stepper-step" data-step="bebidas">5. Bebidas</div>
-                <div class="stepper-step" data-step="finalizacao">6. Revisão</div>
+                <div class="stepper-step" data-step="modo">2. Modo</div>
+                <div class="stepper-step" data-step="sabores">3. Sabores</div>
+                <div class="stepper-step" data-step="quantidade">4. Qtd</div>
+                <div class="stepper-step" data-step="carrinho">5. Carrinho</div>
+                <div class="stepper-step" data-step="adicionais">6. Adicionais</div>
+                <div class="stepper-step" data-step="bebidas">7. Bebidas</div>
+                <div class="stepper-step" data-step="endereco">8. Endereço</div>
+                <div class="stepper-step" data-step="finalizacao">9. Revisão</div>
             </div>
 
             <div class="step-content">
+                <!-- PASSO 1: TAMANHO -->
                 <section id="step-tamanho" class="step-panel active">
                     <h2 class="step-title">Escolha o tamanho</h2>
                     <div class="size-options"></div>
                     <div class="form-actions">
+                        <button id="btn-next-modo" class="btn btn-primary" disabled>Continuar</button>
+                    </div>
+                </section>
+
+                <!-- PASSO 2: MODO (1/2/3 sabores) -->
+                <section id="step-modo" class="step-panel">
+                    <h2 class="step-title">Como você quer sua pizza?</h2>
+                    <p class="step-hint">Escolha se quer 1 sabor, meio a meio (2 sabores) ou 3 sabores</p>
+                    <div class="flavor-mode-options"></div>
+                    <div class="form-actions">
+                        <button class="btn btn-secondary btn-back">Voltar</button>
                         <button id="btn-next-sabores" class="btn btn-primary" disabled>Continuar</button>
                     </div>
                 </section>
 
+                <!-- PASSO 3: SABORES -->
                 <section id="step-sabores" class="step-panel">
                     <h2 class="step-title">Escolha os sabores</h2>
                     <p class="step-hint" id="sabores-hint"></p>
@@ -103,19 +125,52 @@ if (session_status() === PHP_SESSION_NONE) {
                     <div id="pizza-list" class="pizza-grid"></div>
                     <div class="form-actions">
                         <button class="btn btn-secondary btn-back">Voltar</button>
-                        <button id="btn-next-addons" class="btn btn-primary" disabled>Continuar</button>
+                        <button id="btn-next-quantidade" class="btn btn-primary" disabled>Continuar</button>
                     </div>
                 </section>
 
+                <!-- PASSO 4: QUANTIDADE -->
+                <section id="step-quantidade" class="step-panel">
+                    <h2 class="step-title">Quantas pizzas desse tamanho?</h2>
+                    <div class="quantity-options"></div>
+                    <div class="form-actions">
+                        <button class="btn btn-secondary btn-back">Voltar</button>
+                        <button id="btn-next-carrinho" class="btn btn-primary">Continuar</button>
+                    </div>
+                </section>
+
+                <!-- PASSO 5: CARRINHO -->
+                <section id="step-carrinho" class="step-panel">
+                    <h2 class="step-title">Seu carrinho</h2>
+                    <div class="cart-items"></div>
+                    <div style="margin-top: 2rem; text-align: center;">
+                        <p style="color: #6b7280; margin-bottom: 1.5rem;">Deseja pedir mais uma pizza?</p>
+                        <button id="btn-add-more-pizza" class="btn btn-primary" style="margin-right: 1rem;">Adicionar mais pizza</button>
+                        <button id="btn-skip-more-pizza" class="btn btn-secondary">Não, continuar</button>
+                    </div>
+                </section>
+
+                <!-- PASSO 6: ADICIONAIS -->
                 <section id="step-adicionais" class="step-panel">
                     <h2 class="step-title">Adicionais</h2>
                     <div class="addons-grid"></div>
+                    <div class="form-actions">
+                        <button class="btn btn-secondary btn-back">Voltar</button>
+                        <button id="btn-next-bebidas" class="btn btn-primary">Continuar</button>
+                    </div>
+                </section>
+
+                <!-- PASSO 7: BEBIDAS -->
+                <section id="step-bebidas" class="step-panel">
+                    <h2 class="step-title">Bebidas</h2>
+                    <div class="bebidas-grid"></div>
                     <div class="form-actions">
                         <button class="btn btn-secondary btn-back">Voltar</button>
                         <button id="btn-next-endereco" class="btn btn-primary">Continuar</button>
                     </div>
                 </section>
 
+                <!-- PASSO 8: ENDEREÇO -->
                 <section id="step-endereco" class="step-panel">
                     <h2 class="step-title">Endereço de entrega</h2>
                     <p class="step-hint">Atendemos apenas Guarapari/ES. Informe seu endereço para entrega.</p>
@@ -138,21 +193,13 @@ if (session_status() === PHP_SESSION_NONE) {
                             <div class="form-actions">
                                 <button class="btn btn-secondary btn-back">Voltar</button>
                                 <button id="btn-salvar-endereco" class="btn btn-success">Salvar Endereço</button>
-                                <button id="btn-next-bebidas" class="btn btn-primary">Continuar</button>
+                                <button id="btn-skip-endereco" class="btn btn-primary">Usar este endereço</button>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <section id="step-bebidas" class="step-panel">
-                    <h2 class="step-title">Bebidas</h2>
-                    <div class="bebidas-grid"></div>
-                    <div class="form-actions">
-                        <button class="btn btn-secondary btn-back">Voltar</button>
-                        <button id="btn-next-finalizacao" class="btn btn-primary">Continuar</button>
-                    </div>
-                </section>
-
+                <!-- PASSO 9: REVISÃO -->
                 <section id="step-finalizacao" class="step-panel">
                     <h2 class="step-title">Revisão do pedido</h2>
                     <div class="finalizacao-content">
@@ -165,24 +212,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 </section>
             </div>
         </main>
-
-        
     </div>
-
-    <aside id="cart-panel" class="cart-panel">
-        <div class="cart-header">
-            <h3>Seu pedido</h3>
-            <button class="cart-close" onclick="closeCart()">&times;</button>
-        </div>
-        <div class="cart-content"></div>
-        <div class="cart-footer">
-            <div class="cart-total">
-                <span>Total:</span>
-                <strong>R$ <span id="cart-total">0.00</span></strong>
-            </div>
-            <button class="btn btn-primary btn-full" onclick="finalizarPedido()">Finalizar</button>
-        </div>
-    </aside>
 
     <script>
     window.__CARDAPIO_ENDPOINT__ = '../config/cardapio_data.php';
