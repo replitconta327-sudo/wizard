@@ -43,12 +43,18 @@ try {
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Painel Admin - Pizzaria São Paulo</title>
     <link href="../assets/css/style.css" rel="stylesheet">
     <style>
         * { box-sizing: border-box; }
-        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: #ffffff; }
+        html, body { margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #ffffff;
+            width: 100%;
+            overflow-x: hidden;
+        }
 
         .page-wrapper {
             display: flex;
@@ -116,6 +122,8 @@ try {
             justify-content: space-between;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             animation: slideDown 0.3s ease-in;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
 
         @keyframes slideDown {
@@ -147,6 +155,7 @@ try {
             border-radius: 4px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 0.9rem;
         }
 
         .btn-close-notif:hover {
@@ -155,8 +164,8 @@ try {
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.2rem;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
             margin-bottom: 2rem;
         }
 
@@ -170,22 +179,23 @@ try {
 
         .stat-label {
             color: #666;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             margin-bottom: 0.5rem;
             font-weight: 500;
         }
 
         .stat-value {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: #DC2626;
         }
 
         .tabs {
             display: flex;
-            gap: 1rem;
+            gap: 0.8rem;
             margin-bottom: 1.5rem;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .tab-btn {
@@ -198,6 +208,7 @@ try {
             font-weight: 600;
             font-size: 0.95rem;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
         .tab-btn:not(.active) {
@@ -223,6 +234,7 @@ try {
             text-decoration: none;
             display: inline-block;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
         .btn-voltar:hover {
@@ -246,6 +258,7 @@ try {
             padding: 1.2rem;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            flex-wrap: wrap;
         }
 
         .filters input,
@@ -253,10 +266,10 @@ try {
             padding: 0.6rem 1rem;
             border: 1px solid #e5e7eb;
             border-radius: 6px;
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-family: inherit;
             flex: 1;
-            min-width: 200px;
+            min-width: 150px;
             background: white;
         }
 
@@ -270,8 +283,9 @@ try {
         .table-section {
             background: white;
             border-radius: 8px;
-            overflow: hidden;
+            overflow-x: auto;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            -webkit-overflow-scrolling: touch;
         }
 
         .data-table {
@@ -287,6 +301,7 @@ try {
             font-weight: 600;
             color: #374151;
             border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
         }
 
         .data-table td {
@@ -301,6 +316,7 @@ try {
         .pedido-numero {
             font-weight: 700;
             color: #DC2626;
+            min-width: 80px;
         }
 
         .pedido-total {
@@ -317,9 +333,10 @@ try {
             display: inline-block;
             padding: 0.3rem 0.8rem;
             border-radius: 4px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             margin-right: 0.5rem;
+            white-space: nowrap;
         }
 
         .status-badge.novo { background: #FEF3C7; color: #92400E; }
@@ -331,9 +348,10 @@ try {
             padding: 0.4rem;
             border: 1px solid #e5e7eb;
             border-radius: 4px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             cursor: pointer;
             background: white;
+            min-width: 100px;
         }
 
         .empty-state {
@@ -345,19 +363,22 @@ try {
         .action-buttons {
             display: flex;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         .btn-detalhes, .btn-imprimir {
-            padding: 0.4rem 0.8rem;
+            padding: 0.5rem 0.8rem;
             background: #DC2626;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             text-decoration: none;
             display: inline-block;
             font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.2s;
         }
 
         .btn-imprimir {
@@ -366,63 +387,229 @@ try {
 
         .btn-detalhes:hover {
             background: #B91C1C;
+            transform: translateY(-1px);
         }
 
         .btn-imprimir:hover {
             background: #2563EB;
+            transform: translateY(-1px);
         }
 
-        @media (max-width: 1024px) {
+        /* MOBILE RESPONSIVO */
+        @media (max-width: 768px) {
             .page-wrapper {
                 flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
             }
+
             .admin-sidebar {
                 min-width: 100%;
+                padding: 1.5rem;
+                border-radius: 8px;
             }
+
+            .logo-admin {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 1rem;
+            }
+
+            .logo-admin img {
+                width: 70px;
+                height: 70px;
+            }
+
+            .admin-sidebar h1 {
+                font-size: 1.3rem;
+            }
+
+            .admin-sidebar p {
+                font-size: 0.85rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.8rem;
+                margin-bottom: 1rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .stat-label {
+                font-size: 0.75rem;
+            }
+
+            .stat-value {
+                font-size: 1.2rem;
+            }
+
             .tabs {
-                flex-wrap: wrap;
+                gap: 0.5rem;
             }
+
+            .tab-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.85rem;
+                flex: 1;
+                min-width: 0;
+            }
+
+            .btn-voltar {
+                padding: 0.6rem 1rem;
+                font-size: 0.85rem;
+                margin-left: 0;
+                width: 100%;
+                margin-top: 0.5rem;
+            }
+
+            .filters {
+                flex-direction: column;
+                gap: 0.8rem;
+                padding: 1rem;
+            }
+
+            .filters input,
+            .filters select {
+                width: 100%;
+                min-width: 100%;
+                font-size: 1rem;
+                padding: 0.8rem;
+            }
+
             .data-table {
                 font-size: 0.8rem;
             }
+
+            .data-table th,
+            .data-table td {
+                padding: 0.6rem 0.5rem;
+            }
+
+            .status-select {
+                min-width: 80px;
+                padding: 0.3rem;
+                font-size: 0.75rem;
+            }
+
+            .action-buttons {
+                gap: 0.3rem;
+            }
+
+            .btn-detalhes, .btn-imprimir {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.7rem;
+            }
+
+            .notification-banner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .btn-close-notif {
+                width: 100%;
+                padding: 0.6rem;
+            }
         }
 
-        @media print {
-            body * { display: none; }
-            .comanda-print { display: block !important; }
-        }
+        @media (max-width: 480px) {
+            .page-wrapper {
+                padding: 0.5rem;
+            }
 
-        .comanda-print {
-            display: none;
-            background: white;
-            padding: 20px;
-            font-family: monospace;
-            width: 80mm;
-            margin: 0 auto;
-        }
+            .admin-sidebar {
+                padding: 1rem;
+            }
 
-        .comanda-header {
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 14px;
-            font-weight: bold;
-        }
+            .logo-admin {
+                width: 70px;
+                height: 70px;
+                margin-bottom: 0.8rem;
+            }
 
-        .comanda-divider {
-            border-top: 1px dashed #000;
-            margin: 10px 0;
-        }
+            .logo-admin img {
+                width: 60px;
+                height: 60px;
+            }
 
-        .comanda-item {
-            font-size: 12px;
-            line-height: 1.4;
-            margin: 8px 0;
-        }
+            .admin-sidebar h1 {
+                font-size: 1.1rem;
+                margin-bottom: 0.3rem;
+            }
 
-        .comanda-footer {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 11px;
+            .admin-sidebar p {
+                font-size: 0.75rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            .stat-card {
+                padding: 0.8rem;
+            }
+
+            .stat-label {
+                font-size: 0.7rem;
+            }
+
+            .stat-value {
+                font-size: 1rem;
+            }
+
+            .tabs {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .tab-btn {
+                width: 100%;
+                padding: 0.6rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .btn-voltar {
+                width: 100%;
+                margin-top: 0;
+            }
+
+            .filters {
+                padding: 0.8rem;
+                gap: 0.6rem;
+            }
+
+            .filters input,
+            .filters select {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+
+            .data-table {
+                font-size: 0.7rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 0.4rem 0.3rem;
+            }
+
+            .pedido-numero {
+                min-width: 60px;
+            }
+
+            .status-select {
+                min-width: 70px;
+                padding: 0.25rem;
+                font-size: 0.65rem;
+            }
+
+            .btn-detalhes, .btn-imprimir {
+                padding: 0.35rem 0.5rem;
+                font-size: 0.65rem;
+            }
         }
     </style>
 </head>
@@ -433,8 +620,8 @@ try {
             <div class="logo-admin">
                 <img src="../assets/img/logo.webp" alt="Pizzaria São Paulo">
             </div>
-            <h1>Painel Administrativo</h1>
-            <p>Gerenciamento de Pedidos e Clientes</p>
+            <h1>Painel Admin</h1>
+            <p>Pedidos e Clientes</p>
         </div>
 
         <!-- MAIN CONTENT -->
@@ -442,8 +629,8 @@ try {
             <!-- NOTIFICAÇÃO DE NOVO PEDIDO -->
             <div id="notification" class="notification-banner">
                 <div class="notification-content">
-                    <h3>Novo Pedido Recebido!</h3>
-                    <p id="notif-texto">Você tem um novo pedido para preparar</p>
+                    <h3>Novo Pedido!</h3>
+                    <p id="notif-texto">Você tem um novo pedido</p>
                 </div>
                 <button class="btn-close-notif" onclick="this.parentElement.classList.remove('show')">Fechar</button>
             </div>
@@ -470,8 +657,8 @@ try {
 
             <!-- ABAS -->
             <div class="tabs">
-                <button class="tab-btn active" onclick="showTab('pedidos')">Pedidos (<?php echo $total_pedidos; ?>)</button>
-                <button class="tab-btn" onclick="showTab('clientes')">Clientes (<?php echo $total_clientes; ?>)</button>
+                <button class="tab-btn active" onclick="showTab('pedidos')">Pedidos</button>
+                <button class="tab-btn" onclick="showTab('clientes')">Clientes</button>
                 <a href="../" class="btn-voltar">Voltar</a>
             </div>
 
@@ -493,11 +680,8 @@ try {
                                 <tr>
                                     <th>Pedido</th>
                                     <th>Cliente</th>
-                                    <th>Telefone</th>
-                                    <th>Endereço</th>
                                     <th>Total</th>
-                                    <th>Rastreamento</th>
-                                    <th>Data</th>
+                                    <th>Status</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
@@ -505,14 +689,12 @@ try {
                                 <?php foreach ($pedidos as $p): ?>
                                     <tr class="pedido-row" data-cliente="<?php echo strtolower($p['cliente_nome']); ?>" data-status="<?php echo strtolower($p['status_nome']); ?>" data-pedido-id="<?php echo $p['id']; ?>">
                                         <td class="pedido-numero">#<?php echo substr($p['numero_pedido'], -6); ?></td>
-                                        <td class="cliente-nome"><?php echo htmlspecialchars($p['cliente_nome'] ?? 'N/A'); ?></td>
-                                        <td><small><?php echo htmlspecialchars($p['telefone'] ?? '-'); ?></small></td>
-                                        <td><small><?php echo htmlspecialchars(($p['logradouro'] ?? '') . ', ' . ($p['numero'] ?? '')); ?></small></td>
-                                        <td class="pedido-total">R$ <?php echo number_format($p['total'], 2, ',', '.'); ?></td>
+                                        <td class="cliente-nome"><?php echo htmlspecialchars(strlen($p['cliente_nome']) > 15 ? substr($p['cliente_nome'], 0, 12) . '...' : $p['cliente_nome']); ?></td>
+                                        <td class="pedido-total">R$ <?php echo number_format($p['total'], 0, ',', '.'); ?></td>
                                         <td>
                                             <span class="status-badge <?php echo strtolower($p['status_nome'] ?? 'novo'); ?>">
                                                 <?php echo $p['status_nome'] ?? 'Novo'; ?>
-                                            </span>
+                                            </span><br>
                                             <select class="status-select" onchange="mudarStatus(<?php echo $p['id']; ?>, this.value)">
                                                 <option value="">Mudar</option>
                                                 <?php foreach ($status_list as $s): ?>
@@ -520,11 +702,10 @@ try {
                                                 <?php endforeach; ?>
                                             </select>
                                         </td>
-                                        <td><small><?php echo date('d/m/Y H:i', strtotime($p['criado_em'])); ?></small></td>
                                         <td>
                                             <div class="action-buttons">
                                                 <a href="pedido_detalhes.php?id=<?php echo $p['id']; ?>" class="btn-detalhes">Ver</a>
-                                                <button class="btn-imprimir" onclick="imprimirComanda(<?php echo $p['id']; ?>, '<?php echo htmlspecialchars($p['cliente_nome']); ?>', '<?php echo htmlspecialchars($p['numero_pedido']); ?>', '<?php echo htmlspecialchars($p['telefone']); ?>', 'R$ <?php echo number_format($p['total'], 2, ',', '.'); ?>')">Imprimir</button>
+                                                <button class="btn-imprimir" onclick="imprimirComanda(<?php echo $p['id']; ?>, '<?php echo htmlspecialchars($p['cliente_nome']); ?>', '<?php echo htmlspecialchars($p['numero_pedido']); ?>', '<?php echo htmlspecialchars($p['telefone']); ?>', 'R$ <?php echo number_format($p['total'], 2, ',', '.'); ?>')">Print</button>
                                             </div>
                                         </td>
                                     </tr>
@@ -550,17 +731,15 @@ try {
                                     <th>Nome</th>
                                     <th>Telefone</th>
                                     <th>Email</th>
-                                    <th>Cadastrado em</th>
                                     <th>Pedidos</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($clientes as $c): ?>
                                     <tr class="cliente-row" data-nome="<?php echo strtolower($c['nome']); ?>">
-                                        <td class="cliente-nome"><?php echo htmlspecialchars($c['nome']); ?></td>
+                                        <td class="cliente-nome"><?php echo htmlspecialchars(strlen($c['nome']) > 12 ? substr($c['nome'], 0, 10) . '...' : $c['nome']); ?></td>
                                         <td><?php echo htmlspecialchars($c['telefone'] ?? '-'); ?></td>
-                                        <td><small><?php echo htmlspecialchars($c['email'] ?? '-'); ?></small></td>
-                                        <td><small><?php echo date('d/m/Y H:i', strtotime($c['criado_em'])); ?></small></td>
+                                        <td><small><?php echo htmlspecialchars(strlen($c['email']) > 15 ? substr($c['email'], 0, 12) . '...' : ($c['email'] ?? '-')); ?></small></td>
                                         <td><?php echo count(array_filter($pedidos, fn($p) => $p['usuario_id'] == $c['id'])); ?></td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -627,7 +806,7 @@ try {
                 .then(d => {
                     if (d.novo_pedido) {
                         ultimoPedidoID = d.id;
-                        document.getElementById('notif-texto').innerText = `Novo pedido de ${d.cliente} - ${d.numero_pedido}`;
+                        document.getElementById('notif-texto').innerText = `Novo: ${d.cliente} - ${d.numero_pedido}`;
                         document.getElementById('notification').classList.add('show');
                         setTimeout(() => location.reload(), 5000);
                     }
