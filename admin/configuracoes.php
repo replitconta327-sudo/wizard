@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/../config/database.php';
 
 if (!isset($_SESSION['usuario_id'])) {
-    header('Location: /');
+    header('Location: /admin/login.php');
     exit;
 }
 
@@ -265,11 +265,14 @@ try {
             </div>
 
             <div class="sidebar-footer">
-                <div class="user-avatar">A</div>
-                <div class="user-info">
+                <div class="user-avatar"><?php echo strtoupper(substr($usuario['nome'] ?? 'A', 0, 1)); ?></div>
+                <div class="user-info" style="flex: 1;">
                     <h4><?php echo htmlspecialchars($usuario['nome']); ?></h4>
                     <p>Admin</p>
                 </div>
+                <a href="logout.php" style="color: #ddd; text-decoration: none; padding: 0.5rem; cursor: pointer; border-radius: 4px; transition: all 0.2s;" title="Sair"
+                   onmouseover="this.style.background='#333'; this.style.color='white';"
+                   onmouseout="this.style.background='none'; this.style.color='#ddd';">🚪</a>
             </div>
         </div>
 
