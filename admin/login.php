@@ -15,26 +15,25 @@ $sucesso = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $telefone = $_POST['telefone'] ?? '';
-    $senha = $_POST['senha'] ?? '';
     
-    if (!$telefone || !$senha) {
-        $erro = 'Telefone e senha são obrigatórios';
+    if (!$telefone) {
+        $erro = 'Telefone é obrigatório';
     } else {
         try {
             $database = new Database();
             $pdo = $database->pdo();
             
-            $stmt = $pdo->prepare("SELECT id, nome, telefone, senha FROM usuarios WHERE telefone = ? AND tipo = 'admin'");
+            $stmt = $pdo->prepare("SELECT id, nome, telefone FROM usuarios WHERE telefone = ? AND tipo = 'admin'");
             $stmt->execute([$telefone]);
             $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            if ($usuario && password_verify($senha, $usuario['senha'])) {
+            if ($usuario) {
                 $_SESSION['usuario_id'] = $usuario['id'];
                 $_SESSION['usuario_nome'] = $usuario['nome'];
                 header('Location: /admin/dashboard.php');
                 exit;
             } else {
-                $erro = 'Telefone ou senha incorretos';
+                $erro = 'Telefone não encontrado (apenas admins podem acessar)';
             }
         } catch (Exception $e) {
             $erro = 'Erro ao conectar: ' . $e->getMessage();
@@ -203,28 +202,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
         
         <div style="background: #efe; color: #3c3; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; font-size: 0.9rem;">
-            <strong>Teste:</strong><br>
+            <strong>⚡ Modo Edição (Sem Senha):</strong><br>
             📱 11999999999<br>
-            🔒 admin123
+            👉 Apenas digite o telefone!
         </div>
         
         <form method="POST">
             <div class="form-group">
-                <label for="telefone">Telefone</label>
-                <input type="tel" id="telefone" name="telefone" placeholder="(11) 99999-9999" required autocomplete="tel">
-            </div>
-            
-            <div class="form-group">
-                <label for="senha">Senha</label>
-                <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required autocomplete="current-password">
+                <label for="telefone">Telefone Admin</label>
+                <input type="tel" id="telefone" name="telefone" placeholder="(11) 99999-9999" required autocomplete="tel" autofocus>
             </div>
             
             <button type="submit" class="btn-login">Entrar</button>
         </form>
         
         <div class="form-footer">
-            <p>Não tem conta? <a href="/admin/registro.php">Criar cadastro</a></p>
-            <p style="margin-top: 0.5rem;"><a href="/admin/recuperar_senha.php">Esqueceu a senha?</a></p>
+            <p style="color: #999; font-size: 0.85rem;">⚠️ Modo de desenvolvimento - Sem verificação de senha</p>
         </div>
     </div>
 </body>
