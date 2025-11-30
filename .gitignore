@@ -1,0 +1,24 @@
+# PHP
+*.log
+*.cache
+
+# SQLite Database
+data/*.db
+*.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# System
+.DS_Store
+Thumbs.db
+
+# Sessions
+sessions/
+
+# Temp files
+*.tmp
+*.temp

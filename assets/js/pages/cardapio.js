@@ -33,7 +33,7 @@ class CardapioApp {
             }
             if (!loaded) {
                 console.log('Usando dados locais');
-                this.carregarDadosLocais();
+                await this.carregarDadosLocais();
             }
             
             this.setupEventListeners();
@@ -100,6 +100,8 @@ class CardapioApp {
         this.cardapioCache = { data: json.data || {}, timestamp: Date.now() };
         this.adicionais = json.adicionais || [];
         this.bebidas = json.bebidas || [];
+        this.tamanhos = json.tamanhos || this.getTamanhosPadrao();
+        console.log('Tamanhos carregados remotamente:', this.tamanhos);
     }
 
     setupEventListeners() {

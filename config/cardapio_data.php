@@ -39,6 +39,9 @@ try {
     $stmtBeb = $pdo->query("SELECT * FROM bebidas WHERE ativo = 1 ORDER BY ordem, nome");
     $bebidas = $stmtBeb->fetchAll();
     
+    $stmtTam = $pdo->query("SELECT * FROM tamanhos_pizza WHERE ativo = 1 ORDER BY ordem");
+    $tamanhos = $stmtTam->fetchAll();
+    
     $formatPizzas = function($pizzas) {
         return array_map(function($p) {
             return [
@@ -81,11 +84,25 @@ try {
         ];
     }, $bebidas);
     
+    $formattedTamanhos = array_map(function($t) {
+        $icons = ['Pequena' => '🍕', 'Média' => '🍕🍕', 'Grande' => '🍕🍕🍕'];
+        return [
+            'id' => $t['id'],
+            'nome' => $t['nome'],
+            'fatias' => $t['descricao'] ?? ($t['fatias'] . ' fatias'),
+            'icone' => $icons[$t['nome']] ?? '🍕',
+            'pessoas' => $t['pessoas'],
+            'ordem' => $t['ordem'],
+            'ativo' => (bool)$t['ativo']
+        ];
+    }, $tamanhos);
+    
     echo json_encode([
         'ok' => true,
         'data' => $data,
         'adicionais' => $formattedAdicionais,
-        'bebidas' => $formattedBebidas
+        'bebidas' => $formattedBebidas,
+        'tamanhos' => $formattedTamanhos
     ]);
     
 } catch (Exception $e) {
