@@ -1,0 +1,239 @@
+════════════════════════════════════════════════════════════════════════════════
+🍕 PIZZARIA SÃO PAULO - INSTRUÇÕES DEPLOYMENT HOSTGATOR
+════════════════════════════════════════════════════════════════════════════════
+
+✅ SEU SISTEMA JÁ ESTÁ 100% PRONTO PARA SUBIR NA HOSTGATOR!
+
+════════════════════════════════════════════════════════════════════════════════
+PASSO 1: PREPARAR DADOS NO HOSTGATOR (2 minutos)
+════════════════════════════════════════════════════════════════════════════════
+
+1. Acesse seu cPanel HostGator
+2. Clique em "PhpMyAdmin"
+3. Clique em "Novo" 
+4. Digite o nome do banco: pizzaria_sp (ou outro nome)
+5. Selecione "utf8mb4"
+6. Clique "Criar"
+
+7. Selecione o banco criado
+8. Clique na aba "SQL"
+9. Abra o arquivo "migrations/mysql_schema.sql"
+10. Cole TODO o conteúdo no PhpMyAdmin
+11. Clique em "Executar"
+
+✅ PRONTO! Banco com 16 tabelas + dados iniciais criado!
+
+════════════════════════════════════════════════════════════════════════════════
+PASSO 2: FAZER UPLOAD DOS ARQUIVOS (3 minutos)
+════════════════════════════════════════════════════════════════════════════════
+
+Abra seu cPanel HostGator e:
+
+OPÇÃO A - Via File Manager:
+1. Clique em "File Manager"
+2. Navegue para "public_html"
+3. Clique em "Upload Files"
+4. Selecione TODO o projeto (exceto a pasta .git)
+5. Clique em "Upload"
+
+OPÇÃO B - Via FTP (recomendado):
+1. Em cPanel, procure "Contas FTP"
+2. Crie uma nova conta FTP
+3. Use Filezilla para conectar
+4. Arraste os arquivos para public_html
+
+ARQUIVOS A ENVIAR:
+✅ cardapio/
+✅ admin/
+✅ api/
+✅ config/
+✅ migrations/
+✅ data/ (criar pasta vazia se não existir)
+✅ .env.example
+✅ README.md
+✅ CONFIGURACAO.md
+✅ replit.md
+
+ARQUIVOS QUE NÃO PRECISA ENVIAR:
+❌ .git (pasta inteira)
+❌ DEPLOYMENT_HOSTGATOR.md
+
+════════════════════════════════════════════════════════════════════════════════
+PASSO 3: CRIAR E CONFIGURAR ARQUIVO .env (2 minutos)
+════════════════════════════════════════════════════════════════════════════════
+
+1. No cPanel, abra "File Manager"
+2. Navegue para "public_html"
+3. Clique com direita → "Criar Novo Arquivo"
+4. Nome: .env
+5. Clique em "Criar"
+
+6. Clique com direita em ".env" → "Editar"
+7. Cole o conteúdo abaixo (SEM MODIFICAR as variáveis no arquivo .env.example):
+
+════════════════════════════════════════════════════════════════════════════════
+COLE ISTO NO ARQUIVO .env (substitua os valores entre <>):
+════════════════════════════════════════════════════════════════════════════════
+
+APP_ENV=production
+APP_DEBUG=false
+APP_NAME="Pizzaria São Paulo"
+
+DB_TYPE=mysql
+DB_MYSQL_HOST=localhost
+DB_MYSQL_PORT=3306
+DB_MYSQL_DATABASE=<NOME_DO_BANCO_QUE_CRIOU_NO_PASSO_1>
+DB_MYSQL_USERNAME=<SEU_USUARIO_MYSQL>
+DB_MYSQL_PASSWORD=<SUA_SENHA_MYSQL>
+
+SESSION_NAME=pizzaria_session
+SESSION_LIFETIME=86400
+BCRYPT_ROUNDS=10
+
+ADMIN_PHONE=11999999999
+ADMIN_PASSWORD=admin123
+ADMIN_NAME=Admin
+
+PIZZARIA_NOME="Pizzaria São Paulo"
+PIZZARIA_TELEFONE="(11) 9 9999-9999"
+PIZZARIA_EMAIL="contato@pizzaria.com"
+PIZZARIA_ENDERECO="Rua São Paulo, 123 - Guarapari, ES"
+PIZZARIA_HORA_ABERTURA=11:00
+PIZZARIA_HORA_FECHAMENTO=23:00
+
+PIZZARIA_CIDADE=Guarapari
+PIZZARIA_UF=ES
+PIZZARIA_PAIS=Brasil
+
+TAXA_ENTREGA_MINIMA=5.00
+TAXA_ENTREGA_MAXIMA=12.00
+TEMPO_ENTREGA_MINIMO=25
+TEMPO_ENTREGA_MAXIMO=60
+
+ACEITA_DINHEIRO=true
+ACEITA_CARTAO=true
+ACEITA_PIX=false
+
+════════════════════════════════════════════════════════════════════════════════
+ONDE ENCONTRAR OS DADOS MYSQL:
+════════════════════════════════════════════════════════════════════════════════
+
+DB_MYSQL_HOST = Normalmente "localhost" (às vezes o IP do servidor)
+DB_MYSQL_DATABASE = Nome do banco que você criou (ex: pizzaria_sp)
+DB_MYSQL_USERNAME = Nome de usuário MySQL (encontra em cPanel → Contas MySQL)
+DB_MYSQL_PASSWORD = Senha MySQL (encontra em cPanel → Contas MySQL)
+
+EM DÚVIDA? Abra cPanel → Contas MySQL - verá todos os dados lá!
+
+════════════════════════════════════════════════════════════════════════════════
+PASSO 4: TESTAR (1 minuto)
+════════════════════════════════════════════════════════════════════════════════
+
+Abra em seu navegador:
+
+1. CARDÁPIO: seu-dominio.com/cardapio/
+   → Deve mostrar as pizzas
+
+2. ADMIN LOGIN: seu-dominio.com/admin/login.php
+   → Login: 11999999999
+   → Senha: admin123
+   → Se entrar → FUNCIONANDO! ✅
+
+3. DASHBOARD: seu-dominio.com/admin/dashboard.php
+   → Deve mostrar estatísticas
+
+════════════════════════════════════════════════════════════════════════════════
+APÓS DEPLOY (IMPORTANTES!)
+════════════════════════════════════════════════════════════════════════════════
+
+1. ALTERAR SENHA ADMIN:
+   - Acesse: seu-dominio.com/admin/recuperar_senha.php
+   - Altere a senha padrão (11999999999 / admin123)
+
+2. DELETAR ARQUIVOS DE DOCUMENTAÇÃO:
+   Via File Manager, delete:
+   - .env.example
+   - README.md
+   - CONFIGURACAO.md
+   - replit.md
+   - DEPLOYMENT_HOSTGATOR.md
+   - HOSTGATOR_INSTRUCOES.txt (este arquivo)
+
+3. VERIFICAR PERMISSÕES:
+   - Pasta "data" deve ter permissão 755 ou 777
+
+════════════════════════════════════════════════════════════════════════════════
+ESTRUTURA FINAL NO HOSTGATOR
+════════════════════════════════════════════════════════════════════════════════
+
+public_html/
+├── cardapio/
+│   ├── index.php (Fluxo do cliente)
+│   └── [arquivos]
+├── admin/
+│   ├── login.php (Login admin)
+│   ├── dashboard.php (Painel)
+│   ├── pedidos.php (Gerenciar pedidos)
+│   ├── configuracoes.php (CRUD)
+│   └── [arquivos]
+├── api/
+│   ├── admin_config.php (CRUD API)
+│   ├── get_config.php (GET dados)
+│   └── [arquivos]
+├── config/
+│   ├── database.php (Conexão BD)
+│   ├── env.php (Leitor .env)
+│   └── [arquivos]
+├── migrations/
+│   └── mysql_schema.sql (Script SQL)
+├── data/
+│   └── (pasta para uploads)
+└── .env (arquivo de configuração - CRIAR NO SERVIDOR)
+
+════════════════════════════════════════════════════════════════════════════════
+SE ALGO NÃO FUNCIONAR
+════════════════════════════════════════════════════════════════════════════════
+
+❌ "Database connection failed":
+   → Verifique .env (host, database, user, password)
+   → Teste em cPanel → Contas MySQL
+
+❌ "Table doesn't exist":
+   → O script SQL não foi executado
+   → Repita Passo 1 (executar migrations/mysql_schema.sql)
+
+❌ Login não funciona:
+   → Aguarde 1 minuto após upload (cache)
+   → Confirme .env está correto
+
+❌ Página em branco:
+   → Mude APP_DEBUG=true em .env temporariamente
+   → Veja o erro
+   → Depois volte para APP_DEBUG=false
+
+════════════════════════════════════════════════════════════════════════════════
+URLS DO SISTEMA
+════════════════════════════════════════════════════════════════════════════════
+
+Admin Login:           seu-dominio.com/admin/login.php
+Dashboard Admin:       seu-dominio.com/admin/dashboard.php
+Gerenciar Pedidos:     seu-dominio.com/admin/pedidos.php
+Configurações:         seu-dominio.com/admin/configuracoes.php
+Cardápio Cliente:      seu-dominio.com/cardapio/
+
+════════════════════════════════════════════════════════════════════════════════
+RESUMO RÁPIDO
+════════════════════════════════════════════════════════════════════════════════
+
+✅ Criar banco no PhpMyAdmin
+✅ Executar migrations/mysql_schema.sql
+✅ Upload via File Manager ou FTP
+✅ Criar .env com dados MySQL
+✅ Testar login
+✅ Pronto!
+
+TEMPO TOTAL: ~10 minutos
+
+════════════════════════════════════════════════════════════════════════════════
+🎉 SUCESSO! Seu sistema estará online e funcionando!
+════════════════════════════════════════════════════════════════════════════════
