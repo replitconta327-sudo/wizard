@@ -507,7 +507,6 @@ try {
     <script>
         // Sistema de notificação
         function mostrarNotificacao(titulo, mensagem) {
-            // Se não tiver suporte a notificações, cria um banner no HTML
             const banner = document.createElement('div');
             banner.style.cssText = 'position: fixed; top: 20px; left: 270px; right: 20px; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); z-index: 10000; animation: slideDown 0.3s ease-in;';
             banner.innerHTML = `
@@ -523,23 +522,70 @@ try {
             setTimeout(() => banner.remove(), 5000);
         }
 
-        // Polling de novos pedidos
         let ultimoPedidoId = <?php echo count($pedidos) > 0 ? max(array_column($pedidos, 'id')) : 0; ?>;
 
-        function verificarNovoPedido() {
-            fetch('../api/verificar_pedidos.php?ultimo_id=' + ultimoPedidoId)
+        function atualizarPedidos() {
+            fetch('../api/get_pedidos.php')
                 .then(r => r.json())
                 .then(d => {
-                    if (d.novo_pedido) {
-                        ultimoPedidoId = d.id;
-                        mostrarNotificacao('Novo Pedido!', `${d.cliente} - ${d.numero_pedido}`);
-                        setTimeout(() => location.reload(), 1000);
+                    if (d.pedidos && d.pedidos.length > 0) {
+                        const maxId = Math.max(...d.pedidos.map(p => p.id));
+                        if (maxId > ultimoPedidoId) {
+                            const novoPedido = d.pedidos.find(p => p.id > ultimoPedidoId);
+                            if (novoPedido) {
+                                ultimoPedidoId = maxId;
+                                mostrarNotificacao('Novo Pedido!', `${novoPedido.cliente_nome} - ${novoPedido.numero_pedido}`);
+                            }
+                        }
+                        atualizarTabela(d.pedidos);
+                        atualizarEstatisticas(d.total_pedidos, d.pedidos_hoje, d.total_clientes);
                     }
                 })
-                .catch(e => console.error('Erro ao verificar pedidos:', e));
+                .catch(e => console.error('Erro ao atualizar:', e));
         }
 
-        setInterval(verificarNovoPedido, 3000);
+        function atualizarTabela(pedidos) {
+            const tbody = document.querySelector('.data-table tbody');
+            if (!tbody) return;
+
+            const linhasAtuais = Array.from(tbody.querySelectorAll('tr')).map(tr => tr.dataset.pedidoId);
+            const pedidosNovos = pedidos.filter(p => !linhasAtuais.includes(String(p.id)));
+
+            if (pedidosNovos.length > 0) {
+                pedidosNovos.forEach(p => {
+                    const tr = document.createElement('tr');
+                    tr.dataset.pedidoId = p.id;
+                    tr.innerHTML = `
+                        <td class="pedido-numero">${p.numero_pedido.slice(-6)}</td>
+                        <td>${escapeHtml(p.cliente_nome)}</td>
+                        <td>${new Date(p.criado_em).toLocaleDateString('pt-BR')}</td>
+                        <td><span class="status-badge ${(p.status_nome || 'novo').toLowerCase()}">${p.status_nome || 'Novo'}</span></td>
+                        <td><strong>R$ ${(p.total || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
+                        <td><a href="pedido_detalhes.php?id=${p.id}" class="btn-small">Ver / Editar</a></td>
+                    `;
+                    tbody.insertBefore(tr, tbody.firstChild);
+                });
+
+                while (tbody.children.length > 15) {
+                    tbody.removeChild(tbody.lastChild);
+                }
+            }
+        }
+
+        function atualizarEstatisticas(total, hoje, clientes) {
+            const cards = document.querySelectorAll('.stat-value');
+            if (cards[0]) cards[0].textContent = total;
+            if (cards[1]) cards[1].textContent = hoje;
+            if (cards[2]) cards[2].textContent = clientes;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        setInterval(atualizarPedidos, 3000);
 
         // Filtros
         document.getElementById('search-pedido')?.addEventListener('input', function(e) {
@@ -558,7 +604,6 @@ try {
             });
         });
 
-        // Estilo da animação
         const style = document.createElement('style');
         style.textContent = '@keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }';
         document.head.appendChild(style);
