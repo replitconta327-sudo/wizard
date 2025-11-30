@@ -22,3 +22,5 @@ sessions/
 # Temp files
 *.tmp
 *.temp
+.env
+.env.local

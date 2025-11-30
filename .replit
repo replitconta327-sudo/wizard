@@ -34,5 +34,18 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
+localPort = 34029
+externalPort = 3001
+
+[[ports]]
 localPort = 37045
 externalPort = 3000
+
+[userenv]
+
+[userenv.shared]
+APP_ENV = "development"
+DB_TYPE = "sqlite"
+PIZZARIA_NOME = "Pizzaria São Paulo"
+PIZZARIA_CIDADE = "Guarapari"
+PIZZARIA_UF = "ES"

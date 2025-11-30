@@ -1,17 +1,19 @@
 <?php
+require_once __DIR__ . '/env.php';
+
 class Database {
     private $pdo;
     
     public function __construct() {
-        $dbPath = __DIR__ . '/../data/pizzaria.db';
-        $dbDir = dirname($dbPath);
-        
-        if (!is_dir($dbDir)) {
-            mkdir($dbDir, 0755, true);
-        }
+        $dbType = Env::get('DB_TYPE', 'sqlite');
         
         try {
-            $this->pdo = new PDO("sqlite:$dbPath");
+            if ($dbType === 'mysql') {
+                $this->connectMySQL();
+            } else {
+                $this->connectSQLite();
+            }
+            
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             
@@ -19,6 +21,29 @@ class Database {
         } catch (PDOException $e) {
             throw new Exception('Database connection failed: ' . $e->getMessage());
         }
+    }
+    
+    private function connectSQLite() {
+        $dbPath = Env::get('DB_SQLITE_PATH', 'data/pizzaria.db');
+        $dbPath = __DIR__ . '/../' . $dbPath;
+        $dbDir = dirname($dbPath);
+        
+        if (!is_dir($dbDir)) {
+            mkdir($dbDir, 0755, true);
+        }
+        
+        $this->pdo = new PDO("sqlite:$dbPath");
+    }
+    
+    private function connectMySQL() {
+        $host = Env::get('DB_MYSQL_HOST');
+        $port = Env::get('DB_MYSQL_PORT', '3306');
+        $database = Env::get('DB_MYSQL_DATABASE');
+        $username = Env::get('DB_MYSQL_USERNAME');
+        $password = Env::get('DB_MYSQL_PASSWORD');
+        
+        $dsn = "mysql:host=$host:$port;dbname=$database;charset=utf8mb4";
+        $this->pdo = new PDO($dsn, $username, $password);
     }
     
     public function pdo() {

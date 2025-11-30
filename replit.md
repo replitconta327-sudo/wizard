@@ -105,5 +105,27 @@ Sistema completo de pedidos de pizza com fluxo wizard mobile (8 passos) e painel
 - ✅ Recuperação de senha com validação de sessão
 - ✅ XSS protection com htmlspecialchars()
 
+## 🌍 Variáveis de Ambiente (.env)
+
+O sistema agora é 100% configurável via arquivo `.env`:
+
+**Desenvolvimento (SQLite):**
+```env
+DB_TYPE=sqlite
+DB_SQLITE_PATH=data/pizzaria.db
+```
+
+**Produção (MySQL - HostGator):**
+```env
+DB_TYPE=mysql
+DB_MYSQL_HOST=seu-host.mysql.com
+DB_MYSQL_DATABASE=seu_banco
+DB_MYSQL_USERNAME=seu_usuario
+DB_MYSQL_PASSWORD=sua_senha
+```
+
+**Arquivo `.env.example`** contém todas as variáveis disponíveis.
+**Arquivo `CONFIGURACAO.md`** contém guia completo de setup.
+
 ---
-**Última atualização:** 30/11/2025 - Login seguro com Prepared Statements, Recuperar Senha, CRUD completo em Configurações
+**Última atualização:** 30/11/2025 - Login seguro com Prepared Statements, Recuperar Senha, CRUD completo, Variáveis de Ambiente
