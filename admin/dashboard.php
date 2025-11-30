@@ -346,6 +346,9 @@ try {
                 <a href="pedidos.php" class="menu-item">
                     <span>📋</span> Gerenciar Pedidos
                 </a>
+                <a href="configuracoes.php" class="menu-item">
+                    <span>⚙️</span> Configurações
+                </a>
             </div>
 
             <div class="sidebar-footer">

@@ -423,6 +423,9 @@ try {
                 <a href="dashboard.php" class="menu-item">
                     <span>📊</span> Dashboard
                 </a>
+                <a href="configuracoes.php" class="menu-item">
+                    <span>⚙️</span> Configurações
+                </a>
             </div>
 
             <div class="sidebar-footer">

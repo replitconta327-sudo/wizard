@@ -23,14 +23,18 @@ Sistema completo de pedidos de pizza com fluxo wizard mobile (8 passos) e painel
 8. **Revisão** - Confirmar e enviar pedido
 
 ### 👨‍💼 Admin - Painel Profissional
-**Design:** Sidebar vermelho fixo à esquerda (100vh) + conteúdo à direita
+**Design:** Sidebar preto fixo à esquerda (100vh) + conteúdo à direita
 
 #### Funcionalidades:
-1. **Notificação em Tempo Real** - Banner verde automático quando novo pedido chega
-2. **Dashboard com Estatísticas** - Total Pedidos, Clientes, Faturamento, Hoje
-3. **Aba Pedidos** - Lista completa com rastreamento, status, filtros e busca
-4. **Aba Clientes** - Base de clientes com histórico de pedidos
-5. **Impressão de Comanda** - Botão Print para comanda térmica 80mm
+1. **Dashboard** - Estatísticas: Total Pedidos, Pedidos Hoje, Clientes, Faturamento
+2. **Gerenciar Pedidos** - Lista com notificações em tempo real, filtros e impressão
+3. **Configurações** - Controle completo do banco de dados:
+   - 🍕 Pizzas (categorias, preços, descrições)
+   - 🍹 Bebidas (categorias, volumes, preços, estoque)
+   - 📍 Bairros (taxas de entrega, tempos estimados)
+   - ➕ Adicionais (extras, preços)
+   - 🎁 Promoções (nome, descrição, descontos)
+   - 📊 Status (configuração de status de pedidos)
 
 ### 🖨️ Impressão de Comanda
 - Formato otimizado para impressora térmica 80mm
