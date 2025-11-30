@@ -51,70 +51,52 @@ try {
         html, body { margin: 0; padding: 0; }
         body { 
             font-family: 'Inter', sans-serif; 
-            background: #ffffff;
+            background: #f5f5f5;
             width: 100%;
             overflow-x: hidden;
         }
 
-        .page-wrapper {
-            display: flex;
-            min-height: 100vh;
-            gap: 0;
-            padding: 0;
-            margin: 0;
-        }
-
-        .admin-sidebar {
+        .admin-header {
             background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
-            padding: 3rem 2rem;
-            border-radius: 0;
-            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
-            min-width: 320px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            padding: 2rem 1.5rem;
             text-align: center;
             color: white;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
         .logo-admin {
-            width: 120px;
-            height: 120px;
+            width: 80px;
+            height: 80px;
             background: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            margin-bottom: 2rem;
+            margin: 0 auto 1rem;
         }
 
         .logo-admin img {
-            width: 110px;
-            height: 110px;
+            width: 70px;
+            height: 70px;
         }
 
-        .admin-sidebar h1 {
-            margin: 0 0 0.8rem 0;
-            font-size: 2rem;
+        .admin-header h1 {
+            margin: 0 0 0.3rem 0;
+            font-size: 1.8rem;
             font-weight: 700;
         }
 
-        .admin-sidebar p {
+        .admin-header p {
             margin: 0;
-            font-size: 1rem;
+            font-size: 0.95rem;
             opacity: 0.95;
         }
 
-        .admin-main {
-            flex: 1;
-            padding: 3rem;
-            overflow-y: auto;
-            max-height: 100vh;
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
         }
 
         .notification-banner {
@@ -129,7 +111,6 @@ try {
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             animation: slideDown 0.3s ease-in;
             gap: 1rem;
-            flex-wrap: wrap;
         }
 
         @keyframes slideDown {
@@ -161,7 +142,6 @@ try {
             border-radius: 4px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.9rem;
         }
 
         .btn-close-notif:hover {
@@ -173,14 +153,30 @@ try {
             grid-template-columns: repeat(2, 1fr);
             gap: 1.5rem;
             margin-bottom: 2rem;
+            grid-auto-rows: auto;
         }
 
         .stat-card {
             background: white;
-            border-radius: 8px;
-            padding: 2rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            padding: 1.8rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             border-left: 6px solid #DC2626;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-card.grande {
+            grid-column: span 2;
+            padding: 2.5rem;
+        }
+
+        .stat-card.pequeño {
+            padding: 1.2rem;
         }
 
         .stat-label {
@@ -194,6 +190,10 @@ try {
             font-size: 2rem;
             font-weight: 700;
             color: #DC2626;
+        }
+
+        .stat-card.pequeño .stat-value {
+            font-size: 1.5rem;
         }
 
         .tabs {
@@ -212,9 +212,8 @@ try {
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             transition: all 0.2s;
-            white-space: nowrap;
         }
 
         .tab-btn:not(.active) {
@@ -236,11 +235,10 @@ try {
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             text-decoration: none;
             display: inline-block;
             transition: all 0.2s;
-            white-space: nowrap;
         }
 
         .btn-voltar:hover {
@@ -263,7 +261,7 @@ try {
             background: white;
             padding: 1.5rem;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             flex-wrap: wrap;
         }
 
@@ -290,8 +288,7 @@ try {
             background: white;
             border-radius: 8px;
             overflow-x: auto;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            -webkit-overflow-scrolling: touch;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         .data-table {
@@ -301,13 +298,12 @@ try {
         }
 
         .data-table th {
-            background: white;
+            background: #f9fafb;
             padding: 1.2rem;
             text-align: left;
             font-weight: 600;
             color: #374151;
             border-bottom: 1px solid #e5e7eb;
-            white-space: nowrap;
         }
 
         .data-table td {
@@ -342,7 +338,6 @@ try {
             font-size: 0.85rem;
             font-weight: 600;
             margin-right: 0.5rem;
-            white-space: nowrap;
         }
 
         .status-badge.novo { background: #FEF3C7; color: #92400E; }
@@ -369,7 +364,6 @@ try {
         .action-buttons {
             display: flex;
             gap: 0.6rem;
-            flex-wrap: wrap;
         }
 
         .btn-detalhes, .btn-imprimir {
@@ -383,7 +377,6 @@ try {
             text-decoration: none;
             display: inline-block;
             font-weight: 600;
-            white-space: nowrap;
             transition: all 0.2s;
         }
 
@@ -393,90 +386,49 @@ try {
 
         .btn-detalhes:hover {
             background: #B91C1C;
-            transform: translateY(-1px);
         }
 
         .btn-imprimir:hover {
             background: #2563EB;
-            transform: translateY(-1px);
-        }
-
-        /* TABLET E MOBILE */
-        @media (max-width: 1024px) {
-            .admin-sidebar {
-                min-width: 280px;
-                padding: 2rem 1.5rem;
-            }
-
-            .admin-main {
-                padding: 2rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1rem;
-            }
-
-            .stat-card {
-                padding: 1.5rem;
-            }
         }
 
         @media (max-width: 768px) {
-            .page-wrapper {
-                flex-direction: column;
-            }
-
-            .admin-sidebar {
-                min-width: 100%;
-                height: auto;
-                position: static;
-                padding: 2rem 1rem;
+            .admin-header {
+                padding: 1.5rem 1rem;
             }
 
             .logo-admin {
-                width: 100px;
-                height: 100px;
-                margin-bottom: 1rem;
+                width: 70px;
+                height: 70px;
+                margin-bottom: 0.8rem;
             }
 
             .logo-admin img {
-                width: 90px;
-                height: 90px;
+                width: 60px;
+                height: 60px;
             }
 
-            .admin-sidebar h1 {
-                font-size: 1.5rem;
-                margin-bottom: 0.5rem;
+            .admin-header h1 {
+                font-size: 1.3rem;
             }
 
-            .admin-main {
-                padding: 1.5rem;
-                max-height: none;
+            .admin-container {
+                padding: 1.5rem 1rem;
             }
 
             .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: 1fr;
                 gap: 1rem;
-                margin-bottom: 1.5rem;
             }
 
-            .stat-card {
-                padding: 1rem;
-            }
-
-            .stat-label {
-                font-size: 0.85rem;
-                margin-bottom: 0.5rem;
-            }
-
-            .stat-value {
-                font-size: 1.3rem;
+            .stat-card.grande {
+                grid-column: span 1;
+                padding: 1.5rem;
             }
 
             .filters {
                 flex-direction: column;
-                gap: 0.8rem;
+                padding: 1rem;
             }
 
             .filters input,
@@ -487,17 +439,13 @@ try {
 
             .tabs {
                 flex-direction: column;
+                gap: 0.5rem;
             }
 
-            .tab-btn {
+            .tab-btn, .btn-voltar {
                 width: 100%;
                 padding: 0.7rem;
-            }
-
-            .btn-voltar {
-                width: 100%;
-                margin-left: 0;
-                margin-top: 0.5rem;
+                margin-left: 0 !important;
             }
 
             .data-table {
@@ -506,204 +454,150 @@ try {
 
             .data-table th,
             .data-table td {
-                padding: 0.7rem;
-            }
-
-            .action-buttons {
-                gap: 0.3rem;
+                padding: 0.6rem;
             }
 
             .btn-detalhes, .btn-imprimir {
-                padding: 0.4rem 0.7rem;
+                padding: 0.4rem 0.6rem;
                 font-size: 0.75rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .admin-sidebar {
-                padding: 1.5rem 1rem;
-            }
-
-            .logo-admin {
-                width: 80px;
-                height: 80px;
-                margin-bottom: 0.8rem;
-            }
-
-            .logo-admin img {
-                width: 70px;
-                height: 70px;
-            }
-
-            .admin-sidebar h1 {
-                font-size: 1.2rem;
-                margin-bottom: 0.3rem;
-            }
-
-            .admin-main {
-                padding: 1rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 0.8rem;
-            }
-
-            .stat-card {
-                padding: 0.8rem;
-            }
-
-            .stat-value {
-                font-size: 1.1rem;
-            }
-
-            .data-table {
-                font-size: 0.7rem;
-            }
-
-            .data-table th,
-            .data-table td {
-                padding: 0.4rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="page-wrapper">
-        <!-- SIDEBAR VERMELHO -->
-        <div class="admin-sidebar">
-            <div class="logo-admin">
-                <img src="../assets/img/logo.webp" alt="Pizzaria São Paulo">
+    <!-- HEADER NO TOPO -->
+    <div class="admin-header">
+        <div class="logo-admin">
+            <img src="../assets/img/logo.webp" alt="Pizzaria São Paulo">
+        </div>
+        <h1>Painel Admin</h1>
+        <p>Pedidos e Clientes</p>
+    </div>
+
+    <!-- CONTAINER PRINCIPAL -->
+    <div class="admin-container">
+        <!-- NOTIFICAÇÃO DE NOVO PEDIDO -->
+        <div id="notification" class="notification-banner">
+            <div class="notification-content">
+                <h3>Novo Pedido!</h3>
+                <p id="notif-texto">Você tem um novo pedido</p>
             </div>
-            <h1>Painel Admin</h1>
-            <p>Pedidos e Clientes</p>
+            <button class="btn-close-notif" onclick="this.parentElement.classList.remove('show')">Fechar</button>
         </div>
 
-        <!-- MAIN CONTENT -->
-        <div class="admin-main">
-            <!-- NOTIFICAÇÃO DE NOVO PEDIDO -->
-            <div id="notification" class="notification-banner">
-                <div class="notification-content">
-                    <h3>Novo Pedido!</h3>
-                    <p id="notif-texto">Você tem um novo pedido</p>
-                </div>
-                <button class="btn-close-notif" onclick="this.parentElement.classList.remove('show')">Fechar</button>
+        <!-- DASHBOARD ESTATÍSTICAS COM TAMANHOS DIVERSIFICADOS -->
+        <div class="stats-grid">
+            <div class="stat-card grande">
+                <div class="stat-label">Total Pedidos</div>
+                <div class="stat-value"><?php echo $total_pedidos; ?></div>
             </div>
-
-            <!-- DASHBOARD ESTATÍSTICAS -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">Total Pedidos</div>
-                    <div class="stat-value"><?php echo $total_pedidos; ?></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Total Clientes</div>
-                    <div class="stat-value"><?php echo $total_clientes; ?></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Faturamento</div>
-                    <div class="stat-value">R$ <?php echo number_format($total_vendido, 0, ',', '.'); ?></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Hoje</div>
-                    <div class="stat-value"><?php echo $pedidos_hoje; ?></div>
-                </div>
+            <div class="stat-card">
+                <div class="stat-label">Clientes</div>
+                <div class="stat-value"><?php echo $total_clientes; ?></div>
             </div>
-
-            <!-- ABAS -->
-            <div class="tabs">
-                <button class="tab-btn active" onclick="showTab('pedidos')">Pedidos</button>
-                <button class="tab-btn" onclick="showTab('clientes')">Clientes</button>
-                <a href="../" class="btn-voltar">Voltar</a>
+            <div class="stat-card">
+                <div class="stat-label">Faturamento</div>
+                <div class="stat-value">R$ <?php echo number_format($total_vendido, 0, ',', '.'); ?></div>
             </div>
+            <div class="stat-card pequeño">
+                <div class="stat-label">Hoje</div>
+                <div class="stat-value"><?php echo $pedidos_hoje; ?></div>
+            </div>
+        </div>
 
-            <!-- ABA PEDIDOS -->
-            <div id="pedidos" class="tab-content active">
-                <div class="filters">
-                    <input type="text" id="search-pedido" placeholder="Buscar pedido ou cliente...">
-                    <select id="filter-status">
-                        <option value="">Todos os status</option>
-                        <?php foreach ($status_list as $status): ?>
-                            <option value="<?php echo strtolower($status['nome']); ?>"><?php echo $status['nome']; ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="table-section">
-                    <?php if ($pedidos): ?>
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Pedido</th>
-                                    <th>Cliente</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
-                                    <th>Ações</th>
+        <!-- ABAS -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('pedidos')">Pedidos</button>
+            <button class="tab-btn" onclick="showTab('clientes')">Clientes</button>
+            <a href="../" class="btn-voltar">Voltar</a>
+        </div>
+
+        <!-- ABA PEDIDOS -->
+        <div id="pedidos" class="tab-content active">
+            <div class="filters">
+                <input type="text" id="search-pedido" placeholder="Buscar pedido ou cliente...">
+                <select id="filter-status">
+                    <option value="">Todos os status</option>
+                    <?php foreach ($status_list as $status): ?>
+                        <option value="<?php echo strtolower($status['nome']); ?>"><?php echo $status['nome']; ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="table-section">
+                <?php if ($pedidos): ?>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Pedido</th>
+                                <th>Cliente</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($pedidos as $p): ?>
+                                <tr class="pedido-row" data-cliente="<?php echo strtolower($p['cliente_nome']); ?>" data-status="<?php echo strtolower($p['status_nome']); ?>">
+                                    <td class="pedido-numero">#<?php echo substr($p['numero_pedido'], -6); ?></td>
+                                    <td class="cliente-nome"><?php echo htmlspecialchars(strlen($p['cliente_nome']) > 15 ? substr($p['cliente_nome'], 0, 12) . '...' : $p['cliente_nome']); ?></td>
+                                    <td class="pedido-total">R$ <?php echo number_format($p['total'], 0, ',', '.'); ?></td>
+                                    <td>
+                                        <span class="status-badge <?php echo strtolower($p['status_nome'] ?? 'novo'); ?>">
+                                            <?php echo $p['status_nome'] ?? 'Novo'; ?>
+                                        </span><br>
+                                        <select class="status-select" onchange="mudarStatus(<?php echo $p['id']; ?>, this.value)">
+                                            <option value="">Mudar</option>
+                                            <?php foreach ($status_list as $s): ?>
+                                                <option value="<?php echo $s['id']; ?>" <?php echo $p['status_id'] == $s['id'] ? 'selected' : ''; ?>>→ <?php echo $s['nome']; ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="pedido_detalhes.php?id=<?php echo $p['id']; ?>" class="btn-detalhes">Ver</a>
+                                            <button class="btn-imprimir" onclick="imprimirComanda(<?php echo $p['id']; ?>, '<?php echo htmlspecialchars($p['cliente_nome']); ?>', '<?php echo htmlspecialchars($p['numero_pedido']); ?>', '<?php echo htmlspecialchars($p['telefone']); ?>', 'R$ <?php echo number_format($p['total'], 2, ',', '.'); ?>')">Print</button>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($pedidos as $p): ?>
-                                    <tr class="pedido-row" data-cliente="<?php echo strtolower($p['cliente_nome']); ?>" data-status="<?php echo strtolower($p['status_nome']); ?>" data-pedido-id="<?php echo $p['id']; ?>">
-                                        <td class="pedido-numero">#<?php echo substr($p['numero_pedido'], -6); ?></td>
-                                        <td class="cliente-nome"><?php echo htmlspecialchars(strlen($p['cliente_nome']) > 15 ? substr($p['cliente_nome'], 0, 12) . '...' : $p['cliente_nome']); ?></td>
-                                        <td class="pedido-total">R$ <?php echo number_format($p['total'], 0, ',', '.'); ?></td>
-                                        <td>
-                                            <span class="status-badge <?php echo strtolower($p['status_nome'] ?? 'novo'); ?>">
-                                                <?php echo $p['status_nome'] ?? 'Novo'; ?>
-                                            </span><br>
-                                            <select class="status-select" onchange="mudarStatus(<?php echo $p['id']; ?>, this.value)">
-                                                <option value="">Mudar</option>
-                                                <?php foreach ($status_list as $s): ?>
-                                                    <option value="<?php echo $s['id']; ?>" <?php echo $p['status_id'] == $s['id'] ? 'selected' : ''; ?>>→ <?php echo $s['nome']; ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <div class="action-buttons">
-                                                <a href="pedido_detalhes.php?id=<?php echo $p['id']; ?>" class="btn-detalhes">Ver</a>
-                                                <button class="btn-imprimir" onclick="imprimirComanda(<?php echo $p['id']; ?>, '<?php echo htmlspecialchars($p['cliente_nome']); ?>', '<?php echo htmlspecialchars($p['numero_pedido']); ?>', '<?php echo htmlspecialchars($p['telefone']); ?>', 'R$ <?php echo number_format($p['total'], 2, ',', '.'); ?>')">Print</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    <?php else: ?>
-                        <div class="empty-state">Nenhum pedido encontrado</div>
-                    <?php endif; ?>
-                </div>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <div class="empty-state">Nenhum pedido encontrado</div>
+                <?php endif; ?>
             </div>
+        </div>
 
-            <!-- ABA CLIENTES -->
-            <div id="clientes" class="tab-content">
-                <div class="filters">
-                    <input type="text" id="search-cliente" placeholder="Buscar cliente...">
-                </div>
-                <div class="table-section">
-                    <?php if ($clientes): ?>
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Nome</th>
-                                    <th>Telefone</th>
-                                    <th>Email</th>
-                                    <th>Pedidos</th>
+        <!-- ABA CLIENTES -->
+        <div id="clientes" class="tab-content">
+            <div class="filters">
+                <input type="text" id="search-cliente" placeholder="Buscar cliente...">
+            </div>
+            <div class="table-section">
+                <?php if ($clientes): ?>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Telefone</th>
+                                <th>Email</th>
+                                <th>Pedidos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($clientes as $c): ?>
+                                <tr class="cliente-row" data-nome="<?php echo strtolower($c['nome']); ?>">
+                                    <td class="cliente-nome"><?php echo htmlspecialchars(strlen($c['nome']) > 12 ? substr($c['nome'], 0, 10) . '...' : $c['nome']); ?></td>
+                                    <td><?php echo htmlspecialchars($c['telefone'] ?? '-'); ?></td>
+                                    <td><small><?php echo htmlspecialchars(strlen($c['email']) > 15 ? substr($c['email'], 0, 12) . '...' : ($c['email'] ?? '-')); ?></small></td>
+                                    <td><?php echo count(array_filter($pedidos, fn($p) => $p['usuario_id'] == $c['id'])); ?></td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($clientes as $c): ?>
-                                    <tr class="cliente-row" data-nome="<?php echo strtolower($c['nome']); ?>">
-                                        <td class="cliente-nome"><?php echo htmlspecialchars(strlen($c['nome']) > 12 ? substr($c['nome'], 0, 10) . '...' : $c['nome']); ?></td>
-                                        <td><?php echo htmlspecialchars($c['telefone'] ?? '-'); ?></td>
-                                        <td><small><?php echo htmlspecialchars(strlen($c['email']) > 15 ? substr($c['email'], 0, 12) . '...' : ($c['email'] ?? '-')); ?></small></td>
-                                        <td><?php echo count(array_filter($pedidos, fn($p) => $p['usuario_id'] == $c['id'])); ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    <?php else: ?>
-                        <div class="empty-state">Nenhum cliente cadastrado</div>
-                    <?php endif; ?>
-                </div>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <div class="empty-state">Nenhum cliente cadastrado</div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -725,9 +619,8 @@ try {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: 'pedido_id=' + id + '&status_id=' + status
             }).then(r => r.json()).then(d => {
-                if (d.success) {
-                    location.reload();
-                } else alert('Erro ao atualizar status');
+                if (d.success) location.reload();
+                else alert('Erro ao atualizar status');
             });
         }
 
