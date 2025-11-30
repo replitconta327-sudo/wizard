@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- ========================================
+         CONFIGURAÇÕES GERAIS DA PÁGINA
+    ========================================= -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de cadastro e login para Pizzaria São Paulo - Delivery rápido e fácil">
+    <meta name="keywords" content="pizzaria, delivery, cadastro, login, pizza">
+    <meta name="author" content="Pizzaria São Paulo">
+    
+    <!-- Título da Página -->
+    <title>Pizzaria São Paulo - Cadastro de Clientes</title>
+    
+    <!-- Favicon --> 
+    <link rel="icon" type="image/webp" href="assets/img/logo.webp">
+    
+    <!-- ========================================
+         ESTILOS E BIBLIOTECAS EXTERNAS
+    ========================================= -->
+    <!-- Font Awesome Icons - Versão 6.5.0 para ícones consistentes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Google Fonts - Inter para melhor legibilidade -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet Principal -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+    <!-- ========================================
+         CONTAINER PRINCIPAL DA APLICAÇÃO
+    ========================================= -->
+    <div class="app-container">
+        
+        <!-- ========================================
+             TELA DE LOGIN
+             Primeira tela vista pelo usuário
+        ========================================= -->
+        <section class="form-section active" id="login-section" aria-label="Área de login">
+            
+            <!-- Cabeçalho da tela de login -->
+            <header class="form-header">
+                <img src="assets/img/logo.webp" alt="Logo Pizzaria São Paulo" class="logo" width="120" height="120">
+                <h1 class="form-title">Acesso do Cliente</h1>
+                <p class="form-subtitle">Entre na sua conta para fazer pedidos rápidos</p>
+            </header>
+            
+            <!-- Formulário de Login -->
+            <form class="form-content" id="login-form" novalidate>
+                
+                <!-- Campo de Telefone com máscara -->
+                <div class="form-group">
+                    <label for="login-phone" class="form-label">
+                        <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                        Número de Telefone:
+                    </label>
+                    <input 
+                        type="tel" 
+                        id="login-phone" 
+                        name="phone" 
+                        class="form-input" 
+                        placeholder="(00) 00000-0000"
+                        autocomplete="tel"
+                        required
+                        aria-describedby="login-phone-error"
+                        data-mask="phone">
+                    <span class="error-message" id="login-phone-error" role="alert"></span>
+                </div>
+                
+                <!-- Campo de Senha com toggle de visibilidade -->
+                <div class="form-group">
+                    <label for="login-password" class="form-label">
+                        <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                        Senha:
+                    </label>
+                    <div class="password-container">
+                        <input 
+                            type="password" 
+                            id="login-password" 
+                            name="password" 
+                            class="form-input"
+                            placeholder="Digite sua senha"
+                            autocomplete="current-password"
+                            required
+                            aria-describedby="login-password-error"
+                            minlength="6">
+                        <button type="button" class="password-toggle" data-target="login-password" aria-label="Mostrar/ocultar senha">
+                            <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <span class="error-message" id="login-password-error" role="alert"></span>
+                </div>
+                
+                <!-- Botão de Login com estado de loading -->
+                <button type="submit" class="btn btn-primary btn-full" id="login-btn">
+                    <span class="btn-text">
+                        <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+                        Entrar para Pedir
+                    </span>
+                    <span class="btn-loading" style="display: none;">
+                        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+                        Entrando...
+                    </span>
+                </button>
+                
+                <!-- Links auxiliares -->
+                <div class="form-links">
+                    <a href="#" class="form-link" id="show-reset-password" aria-label="Recuperar senha">
+                        <i class="fa-solid fa-key" aria-hidden="true"></i>
+                        Esqueci minha senha
+                    </a>
+                    <span class="link-separator">•</span>
+                    <a href="#" class="form-link" id="show-register" aria-label="Criar nova conta">
+                        <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                        Cadastre-se
+                    </a>
+                </div>
+                
+            </form>
+            
+        </section>
+        
+        <!-- ========================================
+             TELA DE CADASTRO
+             Para novos clientes criarem conta
+        ========================================= -->
+        <section class="form-section" id="register-section" aria-label="Área de cadastro">
+            
+            <!-- Cabeçalho da tela de cadastro -->
+            <header class="form-header">
+                <img src="assets/img/logo.webp" alt="Logo Pizzaria São Paulo" class="logo" width="120" height="120">
+                <h1 class="form-title">Cadastro de Cliente</h1>
+                <p class="form-subtitle">Cadastre-se uma vez e peça sempre com agilidade!</p>
+            </header>
+            
+            <!-- Formulário de Cadastro -->
+            <form class="form-content" id="register-form" novalidate>
+                
+                <!-- Informações Pessoais -->
+                <fieldset class="form-fieldset">
+                    <legend class="fieldset-legend">
+                        <i class="fa-solid fa-user" aria-hidden="true"></i>
+                        Dados Pessoais
+                    </legend>
+                    
+                    <!-- Nome Completo -->
+                    <div class="form-group">
+                        <label for="register-name" class="form-label">
+                            <i class="fa-solid fa-user" aria-hidden="true"></i>
+                            Nome Completo:
+                        </label>
+                        <input 
+                            type="text" 
+                            id="register-name" 
+                            name="name" 
+                            class="form-input"
+                            placeholder="Como podemos te chamar?"
+                            autocomplete="name"
+                            required
+                            aria-describedby="register-name-error"
+                            minlength="3"
+                            maxlength="100">
+                        <span class="error-message" id="register-name-error" role="alert"></span>
+                    </div>
+                    
+                    <!-- Telefone com WhatsApp -->
+                    <div class="form-group">
+                        <label for="register-phone" class="form-label">
+                            <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+                            Número de Telefone (WhatsApp):
+                        </label>
+                        <input 
+                            type="tel" 
+                            id="register-phone" 
+                            name="phone" 
+                            class="form-input"
+                            placeholder="(00) 00000-0000"
+                            autocomplete="tel"
+                            required
+                            aria-describedby="register-phone-error"
+                            data-mask="phone">
+                        <small class="form-help">Usaremos para confirmar seu pedido</small>
+                        <span class="error-message" id="register-phone-error" role="alert"></span>
+                    </div>
+                    
+                </fieldset>
+                
+                <!-- Endereço para Entrega -->
+                <fieldset class="form-fieldset">
+                    <legend class="fieldset-legend">
+                        <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                        Endereço para Entrega
+                    </legend>
+                    
+                    <!-- Rua e Número -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="register-street" class="form-label">
+                                <i class="fa-solid fa-road" aria-hidden="true"></i>
+                                Rua/Avenida:
+                            </label>
+                            <input 
+                                type="text" 
+                                id="register-street" 
+                                name="street" 
+                                class="form-input"
+                                placeholder="Ex: Rua das Pizzas"
+                                autocomplete="address-line1"
+                                required
+                                aria-describedby="register-street-error"
+                                minlength="3">
+                            <span class="error-message" id="register-street-error" role="alert"></span>
+                        </div>
+                        
+                        <div class="form-group form-group-small">
+                            <label for="register-number" class="form-label">
+                                <i class="fa-solid fa-hashtag" aria-hidden="true"></i>
+                                Número:
+                            </label>
+                            <input 
+                                type="text" 
+                                id="register-number" 
+                                name="number" 
+                                class="form-input"
+                                placeholder="123A"
+                                autocomplete="address-line2"
+                                required
+                                aria-describedby="register-number-error"
+                                maxlength="10">
+                            <span class="error-message" id="register-number-error" role="alert"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Bairro e CEP -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="register-neighborhood" class="form-label">
+                                <i class="fa-solid fa-city" aria-hidden="true"></i>
+                                Bairro:
+                            </label>
+                            <input 
+                                type="text" 
+                                id="register-neighborhood" 
+                                name="neighborhood" 
+                                class="form-input"
+                                placeholder="Ex: Centro"
+                                autocomplete="address-level2"
+                                required
+                                aria-describedby="register-neighborhood-error"
+                                minlength="3">
+                            <span class="error-message" id="register-neighborhood-error" role="alert"></span>
+                        </div>
+                        
+                        <div class="form-group form-group-medium">
+                            <label for="register-cep" class="form-label">
+                                <i class="fa-solid fa-map-pin" aria-hidden="true"></i>
+                                CEP:
+                            </label>
+                            <input 
+                                type="text" 
+                                id="register-cep" 
+                                name="cep" 
+                                class="form-input"
+                                placeholder="00000-000"
+                                autocomplete="postal-code"
+                                inputmode="numeric"
+                                pattern="\d{5}-\d{3}"
+                                required
+                                aria-invalid="false"
+                                aria-describedby="register-cep-error"
+                                data-mask="cep"
+                                maxlength="9">
+                            <span class="error-message" id="register-cep-error" role="alert"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Ponto de Referência -->
+                    <div class="form-group">
+                        <label for="register-reference" class="form-label">
+                            <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
+                            Ponto de Referência (opcional):
+                        </label>
+                        <input 
+                            type="text" 
+                            id="register-reference" 
+                            name="reference" 
+                            class="form-input"
+                            placeholder="Ex: Próximo ao mercado, portão azul..."
+                            maxlength="200">
+                    </div>
+                    
+                </fieldset>
+                
+                <!-- Segurança da Conta -->
+                <fieldset class="form-fieldset">
+                    <legend class="fieldset-legend">
+                        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                        Segurança da Conta
+                    </legend>
+                    
+                    <!-- Senha -->
+                    <div class="form-group">
+                        <label for="register-password" class="form-label">
+                            <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                            Crie uma Senha:
+                        </label>
+                        <div class="password-container">
+                            <input 
+                                type="password" 
+                                id="register-password" 
+                                name="password" 
+                                class="form-input"
+                                placeholder="Mínimo 6 caracteres"
+                                autocomplete="new-password"
+                                required
+                                aria-describedby="register-password-error"
+                                minlength="6">
+                            <button type="button" class="password-toggle" data-target="register-password" aria-label="Mostrar/ocultar senha">
+                                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <span class="error-message" id="register-password-error" role="alert"></span>
+                    </div>
+                    
+                    <!-- Confirmar Senha -->
+                    <div class="form-group">
+                        <label for="confirm-password" class="form-label">
+                            <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                            Confirme sua Senha:
+                        </label>
+                        <div class="password-container">
+                            <input 
+                                type="password" 
+                                id="confirm-password" 
+                                name="confirmPassword" 
+                                class="form-input"
+                                placeholder="Digite a senha novamente"
+                                autocomplete="new-password"
+                                required
+                                aria-describedby="confirm-password-error"
+                                minlength="6">
+                            <button type="button" class="password-toggle" data-target="confirm-password" aria-label="Mostrar/ocultar senha">
+                                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <span class="error-message" id="confirm-password-error" role="alert"></span>
+                    </div>
+                    
+                </fieldset>
+                
+                <!-- Botão de Cadastro -->
+                <button type="submit" class="btn btn-primary btn-full" id="register-btn">
+                    <span class="btn-text">
+                        <i class="fa-solid fa-user-check" aria-hidden="true"></i>
+                        Finalizar Cadastro
+                    </span>
+                    <span class="btn-loading" style="display: none;">
+                        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+                        Cadastrando...
+                    </span>
+                </button>
+                
+                <!-- Link para Login -->
+                <div class="form-links">
+                    <a href="#" class="form-link" id="back-to-login-from-register" aria-label="Voltar para login">
+                        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                        Já é cliente? Faça login
+                    </a>
+                </div>
+                
+            </form>
+            
+        </section>
+        
+        <!-- ========================================
+             TELA DE RECUPERAÇÃO DE SENHA
+             Para usuários esqueceram a senha
+        ========================================= -->
+        <section class="form-section" id="reset-password-section" aria-label="Recuperação de senha">
+            
+            <!-- Cabeçalho da tela de recuperação -->
+            <header class="form-header">
+                <img src="assets/img/logo.webp" alt="Logo Pizzaria São Paulo" class="logo logo-small" width="80" height="80">
+                <h1 class="form-title">Redefinir Senha</h1>
+                <p class="form-subtitle">Recupere o acesso à sua conta</p>
+            </header>
+            
+            <!-- Formulário de Recuperação -->
+            <form class="form-content" id="reset-password-form" novalidate>
+                
+                <!-- Passo 1: Verificação de identidade -->
+                <div id="reset-step-1">
+                    
+                    <!-- Telefone cadastrado -->
+                    <div class="form-group">
+                        <label for="reset-phone" class="form-label">
+                            <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                            Número de Telefone:
+                        </label>
+                        <input 
+                            type="tel" 
+                            id="reset-phone" 
+                            name="phone" 
+                            class="form-input"
+                            placeholder="(00) 00000-0000"
+                            autocomplete="tel"
+                            required
+                            aria-describedby="reset-phone-error"
+                            data-mask="phone">
+                        <small class="form-help">Digite o telefone cadastrado na sua conta</small>
+                        <span class="error-message" id="reset-phone-error" role="alert"></span>
+                    </div>
+                    
+                    <!-- Nome completo -->
+                    <div class="form-group">
+                        <label for="reset-name" class="form-label">
+                            <i class="fa-solid fa-user" aria-hidden="true"></i>
+                            Nome Completo:
+                        </label>
+                        <input 
+                            type="text" 
+                            id="reset-name" 
+                            name="name" 
+                            class="form-input"
+                            placeholder="Seu nome completo"
+                            autocomplete="name"
+                            required
+                            aria-describedby="reset-name-error"
+                            minlength="3">
+                        <small class="form-help">Digite seu nome exatamente como cadastrado</small>
+                        <span class="error-message" id="reset-name-error" role="alert"></span>
+                    </div>
+                    
+                </div>
+                
+                <!-- Passo 2: Nova senha (inicialmente oculto) -->
+                <div id="reset-step-2" style="display: none;">
+                    
+                    <!-- Nova Senha -->
+                    <div class="form-group">
+                        <label for="reset-new-password" class="form-label">
+                            <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                            Nova Senha:
+                        </label>
+                        <div class="password-container">
+                            <input 
+                                type="password" 
+                                id="reset-new-password" 
+                                name="newPassword" 
+                                class="form-input"
+                                placeholder="Mínimo 6 caracteres"
+                                autocomplete="new-password"
+                                required
+                                aria-describedby="reset-new-password-error"
+                                minlength="6">
+                            <button type="button" class="password-toggle" data-target="reset-new-password" aria-label="Mostrar/ocultar senha">
+                                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <span class="error-message" id="reset-new-password-error" role="alert"></span>
+                    </div>
+                    
+                    <!-- Confirmar Nova Senha -->
+                    <div class="form-group">
+                        <label for="reset-confirm-password" class="form-label">
+                            <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                            Confirmar Nova Senha:
+                        </label>
+                        <div class="password-container">
+                            <input 
+                                type="password" 
+                                id="reset-confirm-password" 
+                                name="confirmNewPassword" 
+                                class="form-input"
+                                placeholder="Repita a nova senha"
+                                autocomplete="new-password"
+                                required
+                                aria-describedby="reset-confirm-password-error"
+                                minlength="6">
+                            <button type="button" class="password-toggle" data-target="reset-confirm-password" aria-label="Mostrar/ocultar senha">
+                                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <span class="error-message" id="reset-confirm-password-error" role="alert"></span>
+                    </div>
+                    
+                </div>
+                
+                <!-- Botão de Ação (muda conforme o passo) -->
+                <button type="submit" class="btn btn-primary btn-full" id="reset-btn">
+                    <span class="btn-text" id="reset-btn-text">
+                        <i class="fa-solid fa-check" aria-hidden="true"></i>
+                        Verificar Dados
+                    </span>
+                    <span class="btn-loading" style="display: none;">
+                        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+                        Processando...
+                    </span>
+                </button>
+                
+                <!-- Link para voltar ao login -->
+                <div class="form-links">
+                    <a href="#" class="form-link" id="back-to-login-from-reset" aria-label="Voltar para login">
+                        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                        Lembrou da senha? Voltar ao login
+                    </a>
+                </div>
+                
+            </form>
+            
+        </section>
+        
+        <!-- ========================================
+             DASHBOARD DO CLIENTE
+             Área logada do usuário
+        ========================================= -->
+        <section class="dashboard-section" id="dashboard-section" aria-label="Dashboard do cliente">
+            
+            <!-- Cabeçalho do Dashboard -->
+            <header class="dashboard-header">
+                <img src="assets/img/logo.webp" alt="Logo Pizzaria São Paulo" class="logo logo-small" width="60" height="60">
+                <div class="welcome-info">
+                    <h1 class="welcome-title">Olá, <span id="user-name-display">Cliente</span>!</h1>
+                    <p class="welcome-subtitle">Seus dados estão salvos. Agora é só escolher sua pizza!</p>
+                </div>
+            </header>
+            
+            <!-- Informações do Usuário -->
+            <div class="user-info-card">
+                <h2 class="info-title">
+                    <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
+                    Seus Dados para Entrega:
+                </h2>
+                
+                <div class="info-content">
+                    <!-- Nome -->
+                    <div class="info-item">
+                        <strong class="info-label">
+                            <i class="fa-solid fa-user" aria-hidden="true"></i>
+                            Nome:
+                        </strong>
+                        <span class="info-value" id="user-full-name">Carregando...</span>
+                    </div>
+                    
+                    <!-- Telefone -->
+                    <div class="info-item">
+                        <strong class="info-label">
+                            <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                            Telefone:
+                        </strong>
+                        <span class="info-value" id="user-phone-number">Carregando...</span>
+                    </div>
+                    
+                    <!-- Endereço -->
+                    <div class="info-item info-item-block">
+                        <strong class="info-label">
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                            Endereço:
+                        </strong>
+                        <div class="address-info">
+                            <p class="address-line" id="user-address-line">Carregando...</p>
+                            <p class="address-line" id="user-neighborhood-cep">Carregando...</p>
+                            <p class="address-line" id="user-reference-line" style="display: none;">
+                                <strong>Referência:</strong> <span id="user-reference-text"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Ações do Dashboard -->
+            <div class="dashboard-actions">
+                
+                <!-- Botão Principal - Ver Cardápio -->
+                <button type="button" class="btn btn-primary btn-large" id="view-menu-btn" aria-label="Ver cardápio e fazer pedido">
+                    <i class="fa-solid fa-pizza-slice" aria-hidden="true"></i>
+                    Ver Cardápio e Fazer Pedido
+                </button>
+                
+                <!-- Ações Secundárias -->
+                <div class="secondary-actions">
+                    <button type="button" class="btn btn-secondary" id="edit-profile-btn" aria-label="Editar dados do perfil">
+                        <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                        Editar Dados
+                    </button>
+                    
+                    <button type="button" class="btn btn-secondary" id="logout-btn" aria-label="Sair da conta">
+                        <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+                        Sair
+                    </button>
+                </div>
+                
+            </div>
+            
+        </section>
+        
+    </div>
+    
+    <!-- ========================================
+         SISTEMA DE NOTIFICAÇÕES
+         Container para mensagens de feedback
+    ========================================= -->
+    <div id="notification-container" class="notification-container" aria-live="polite" aria-atomic="true"></div>
+    
+    <!-- ========================================
+         OVERLAY DE CARREGAMENTO
+         Para operações assíncronas
+    ========================================= -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <i class="fa-solid fa-spinner fa-spin fa-3x" aria-hidden="true"></i>
+            </div>
+            <p class="loading-text">Processando...</p>
+        </div>
+    </div>
+    
+    <!-- ========================================
+         JAVASCRIPT
+         Scripts principais da aplicação
+    ========================================= -->
+    <!-- Bibliotecas externas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/imask/7.1.3/imask.min.js"></script>
+    
+    <!-- Script principal -->
+    <script src="assets/js/app.js" defer></script>
+    
+</body>
+</html>
