@@ -14,7 +14,7 @@ if (session_status() === PHP_SESSION_NONE) {
     <link href="../assets/css/style.css" rel="stylesheet">
     <link href="../assets/css/pages/cardapio.css" rel="stylesheet">
     <style>
-    .size-options, .flavor-mode-options, .quantity-options {
+    .size-options, .flavor-mode-options {
         display: grid !important;
         grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
         gap: 1.5rem !important;
@@ -22,7 +22,7 @@ if (session_status() === PHP_SESSION_NONE) {
         max-width: 600px !important;
         margin: 0 auto !important;
     }
-    .size-option, .flavor-mode-option, .quantity-option {
+    .size-option, .flavor-mode-option {
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
@@ -36,12 +36,12 @@ if (session_status() === PHP_SESSION_NONE) {
         transition: all 0.2s ease !important;
         min-height: 100px !important;
     }
-    .size-option:hover, .flavor-mode-option:hover, .quantity-option:hover {
+    .size-option:hover, .flavor-mode-option:hover {
         border-color: #dc2626 !important;
         transform: translateY(-2px) !important;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
     }
-    .size-option.selected, .flavor-mode-option.selected, .quantity-option.selected {
+    .size-option.selected, .flavor-mode-option.selected {
         border-color: #dc2626 !important;
         background: #fef2f2 !important;
         box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15) !important;
@@ -64,9 +64,11 @@ if (session_status() === PHP_SESSION_NONE) {
     .cart-item-name { font-weight: 600; color: #111827; }
     .cart-item-flavors { font-size: 0.9rem; color: #6b7280; margin-top: 0.25rem; }
     .cart-item-price { font-weight: 600; color: #dc2626; margin-right: 1rem; }
-    .cart-item-actions { display: flex; gap: 0.5rem; }
+    .cart-item-actions { display: flex; gap: 0.5rem; align-items: center; }
     .btn-edit-pizza { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
     .btn-remove-pizza { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
+    .qty-controls { display: flex; gap: 0.5rem; align-items: center; }
+    .qty-btn { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -84,12 +86,11 @@ if (session_status() === PHP_SESSION_NONE) {
                 <div class="stepper-step active" data-step="tamanho">1. Tamanho</div>
                 <div class="stepper-step" data-step="modo">2. Modo</div>
                 <div class="stepper-step" data-step="sabores">3. Sabores</div>
-                <div class="stepper-step" data-step="quantidade">4. Qtd</div>
-                <div class="stepper-step" data-step="carrinho">5. Carrinho</div>
-                <div class="stepper-step" data-step="adicionais">6. Adicionais</div>
-                <div class="stepper-step" data-step="bebidas">7. Bebidas</div>
-                <div class="stepper-step" data-step="endereco">8. Endereço</div>
-                <div class="stepper-step" data-step="finalizacao">9. Revisão</div>
+                <div class="stepper-step" data-step="carrinho">4. Carrinho</div>
+                <div class="stepper-step" data-step="adicionais">5. Adicionais</div>
+                <div class="stepper-step" data-step="bebidas">6. Bebidas</div>
+                <div class="stepper-step" data-step="endereco">7. Endereço</div>
+                <div class="stepper-step" data-step="finalizacao">8. Revisão</div>
             </div>
 
             <div class="step-content">
@@ -125,21 +126,11 @@ if (session_status() === PHP_SESSION_NONE) {
                     <div id="pizza-list" class="pizza-grid"></div>
                     <div class="form-actions">
                         <button class="btn btn-secondary btn-back">Voltar</button>
-                        <button id="btn-next-quantidade" class="btn btn-primary" disabled>Continuar</button>
+                        <button id="btn-add-to-cart" class="btn btn-primary" disabled>Adicionar ao Carrinho</button>
                     </div>
                 </section>
 
-                <!-- PASSO 4: QUANTIDADE -->
-                <section id="step-quantidade" class="step-panel">
-                    <h2 class="step-title">Quantas pizzas desse tamanho?</h2>
-                    <div class="quantity-options"></div>
-                    <div class="form-actions">
-                        <button class="btn btn-secondary btn-back">Voltar</button>
-                        <button id="btn-next-carrinho" class="btn btn-primary">Continuar</button>
-                    </div>
-                </section>
-
-                <!-- PASSO 5: CARRINHO -->
+                <!-- PASSO 4: CARRINHO -->
                 <section id="step-carrinho" class="step-panel">
                     <h2 class="step-title">Seu carrinho</h2>
                     <div class="cart-items"></div>

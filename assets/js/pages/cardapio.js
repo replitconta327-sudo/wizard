@@ -103,8 +103,7 @@ class CardapioApp {
         // Botões de navegação
         document.getElementById('btn-next-modo')?.addEventListener('click', () => this.showStep('modo'));
         document.getElementById('btn-next-sabores')?.addEventListener('click', () => this.showStep('sabores'));
-        document.getElementById('btn-next-quantidade')?.addEventListener('click', () => this.showStep('quantidade'));
-        document.getElementById('btn-next-carrinho')?.addEventListener('click', () => this.addPizzaToCart());
+        document.getElementById('btn-add-to-cart')?.addEventListener('click', () => this.addPizzaToCart());
         document.getElementById('btn-add-more-pizza')?.addEventListener('click', () => this.resetForNewPizza());
         document.getElementById('btn-skip-more-pizza')?.addEventListener('click', () => this.showStep('adicionais'));
         document.getElementById('btn-next-bebidas')?.addEventListener('click', () => this.showStep('bebidas'));
@@ -155,10 +154,6 @@ class CardapioApp {
                 const mode = e.target.closest('.flavor-mode-option').dataset.mode;
                 this.selectFlavorMode(mode);
             }
-            if (e.target.closest('.quantity-option')) {
-                const qty = e.target.closest('.quantity-option').dataset.qty;
-                this.selectQuantity(qty);
-            }
             if (e.target.closest('.pizza-card')) {
                 const pizzaId = e.target.closest('.pizza-card').dataset.pizzaId;
                 const category = e.target.closest('.pizza-card').dataset.categoria;
@@ -180,11 +175,19 @@ class CardapioApp {
                 const idx = e.target.closest('.btn-remove-pizza').dataset.idx;
                 this.removePizzaFromCart(parseInt(idx));
             }
+            if (e.target.closest('.qty-btn-inc')) {
+                const idx = e.target.closest('.qty-btn-inc').dataset.idx;
+                this.increasePizzaQty(parseInt(idx));
+            }
+            if (e.target.closest('.qty-btn-dec')) {
+                const idx = e.target.closest('.qty-btn-dec').dataset.idx;
+                this.decreasePizzaQty(parseInt(idx));
+            }
         });
     }
 
     canNavigateTo(step) {
-        const steps = ['tamanho','modo','sabores','quantidade','carrinho','adicionais','bebidas','endereco','finalizacao'];
+        const steps = ['tamanho','modo','sabores','carrinho','adicionais','bebidas','endereco','finalizacao'];
         const currentIndex = steps.indexOf(this.currentStep);
         const targetIndex = steps.indexOf(step);
         return targetIndex <= currentIndex + 1;
@@ -213,7 +216,6 @@ class CardapioApp {
             case 'tamanho': this.renderTamanhos(); break;
             case 'modo': this.renderFlavorMode(); break;
             case 'sabores': this.renderPizzas(); break;
-            case 'quantidade': this.renderQuantidadeOptions(); break;
             case 'carrinho': this.renderCarrinho(); break;
             case 'adicionais': this.renderAdicionais(); break;
             case 'bebidas': this.renderBebidas(); break;
@@ -309,21 +311,7 @@ class CardapioApp {
         const selecionados = this.currentPizza?.sabores?.length || 0;
         document.getElementById('sabores-hint').textContent = `Sabores selecionados: ${selecionados} / ${maxSabores}`;
         
-        document.getElementById('btn-next-quantidade').disabled = selecionados === 0;
-    }
-
-    renderQuantidadeOptions() {
-        const container = document.querySelector('.quantity-options');
-        if (!container) return;
-        container.innerHTML = '';
-
-        for (let i = 1; i <= 5; i++) {
-            const div = document.createElement('div');
-            div.className = 'quantity-option' + (this.currentPizza?.quantidade === i ? ' selected' : '');
-            div.dataset.qty = i;
-            div.innerHTML = `<div class="size-label">${i} ${i === 1 ? 'Pizza' : 'Pizzas'}</div>`;
-            container.appendChild(div);
-        }
+        document.getElementById('btn-add-to-cart').disabled = selecionados === 0;
     }
 
     renderCarrinho() {
@@ -341,11 +329,16 @@ class CardapioApp {
             return `
                 <div class="cart-item-card">
                     <div class="cart-item-info">
-                        <div class="cart-item-name">${pizza.quantidade}x ${pizza.tamanho.nome}</div>
+                        <div class="cart-item-name">${pizza.tamanho.nome}</div>
                         <div class="cart-item-flavors">${flavorNames}</div>
                     </div>
                     <div class="cart-item-price">R$ ${(precoUnitario * pizza.quantidade).toFixed(2).replace('.', ',')}</div>
                     <div class="cart-item-actions">
+                        <div class="qty-controls">
+                            <button class="btn btn-secondary qty-btn qty-btn-dec" data-idx="${idx}">-</button>
+                            <span style="min-width: 25px; text-align: center;">${pizza.quantidade}</span>
+                            <button class="btn btn-secondary qty-btn qty-btn-inc" data-idx="${idx}">+</button>
+                        </div>
                         <button class="btn btn-secondary btn-edit-pizza" data-idx="${idx}">Editar</button>
                         <button class="btn btn-secondary btn-remove-pizza" data-idx="${idx}">Remover</button>
                     </div>
@@ -511,32 +504,35 @@ class CardapioApp {
         this.saveState();
     }
 
-    selectQuantity(qty) {
-        if (!this.currentPizza) return;
-        this.currentPizza.quantidade = parseInt(qty);
-        
-        document.querySelectorAll('.quantity-option').forEach(el => {
-            el.classList.toggle('selected', el.dataset.qty === qty.toString());
-        });
-        
-        this.saveState();
-    }
-
     // OPERAÇÕES DO CARRINHO
     addPizzaToCart() {
         if (!this.currentPizza || !this.currentPizza.sabores.length) {
             this.showError('Selecione sabores primeiro');
             return;
         }
-        if (!this.currentPizza.quantidade) {
-            this.showError('Selecione a quantidade');
-            return;
-        }
 
+        this.currentPizza.quantidade = 1;
         this.pizzasCart.push({ ...this.currentPizza });
         this.showSuccess('Pizza adicionada ao carrinho!');
+        this.saveState();
         this.resetForNewPizza();
         this.showStep('carrinho');
+    }
+
+    increasePizzaQty(idx) {
+        if (idx >= 0 && idx < this.pizzasCart.length) {
+            this.pizzasCart[idx].quantidade = Math.min(10, (this.pizzasCart[idx].quantidade || 1) + 1);
+            this.renderCarrinho();
+            this.saveState();
+        }
+    }
+
+    decreasePizzaQty(idx) {
+        if (idx >= 0 && idx < this.pizzasCart.length) {
+            this.pizzasCart[idx].quantidade = Math.max(1, (this.pizzasCart[idx].quantidade || 1) - 1);
+            this.renderCarrinho();
+            this.saveState();
+        }
     }
 
     resetForNewPizza() {
