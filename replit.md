@@ -7,6 +7,12 @@ Sistema completo de pedidos de pizza com fluxo wizard mobile (8 passos) e painel
 
 ## Status: ✅ MVP COMPLETO
 
+### 🔗 Links de Acesso
+- **Cliente:** `/cardapio/` - Fluxo wizard de pedidos
+- **Admin Demo:** Clique em "Acessar Painel Admin" na homepage
+- **Admin Dashboard:** `/admin/dashboard.php`
+- **Admin Pedidos:** `/admin/pedidos.php`
+
 ### 🍕 Cliente - Fluxo de Pedido (8 Passos)
 1. **Tamanho** - Escolher P/M/G
 2. **Modo** - Escolher 1/2/3 sabores
