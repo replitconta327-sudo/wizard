@@ -48,7 +48,7 @@ try {
     <link href="../assets/css/style.css" rel="stylesheet">
     <style>
         * { box-sizing: border-box; }
-        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: #f5f5f5; }
+        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: #ffffff; }
 
         .page-wrapper {
             display: flex;
@@ -209,6 +209,7 @@ try {
             font-family: inherit;
             flex: 1;
             min-width: 200px;
+            background: white;
         }
 
         .filters input:focus,
@@ -232,7 +233,7 @@ try {
         }
 
         .data-table th {
-            background: #f9fafb;
+            background: white;
             padding: 1rem;
             text-align: left;
             font-weight: 600;
@@ -284,6 +285,7 @@ try {
             border-radius: 4px;
             font-size: 0.85rem;
             cursor: pointer;
+            background: white;
         }
 
         .empty-state {
