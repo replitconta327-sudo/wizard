@@ -30,7 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $database = new Database();
             $pdo = $database->pdo();
             
-            $existe = $pdo->query("SELECT id FROM usuarios WHERE telefone = '$telefone'")->fetch();
+            $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE telefone = ?");
+            $stmt->execute([$telefone]);
+            $existe = $stmt->fetch();
             
             if ($existe) {
                 $erro = 'Este telefone já está cadastrado';

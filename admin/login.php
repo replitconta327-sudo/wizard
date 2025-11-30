@@ -24,7 +24,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $database = new Database();
             $pdo = $database->pdo();
             
-            $usuario = $pdo->query("SELECT id, nome, telefone, senha FROM usuarios WHERE telefone = '$telefone' AND tipo = 'admin'")->fetch(PDO::FETCH_ASSOC);
+            $stmt = $pdo->prepare("SELECT id, nome, telefone, senha FROM usuarios WHERE telefone = ? AND tipo = 'admin'");
+            $stmt->execute([$telefone]);
+            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if ($usuario && password_verify($senha, $usuario['senha'])) {
                 $_SESSION['usuario_id'] = $usuario['id'];
@@ -222,6 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <div class="form-footer">
             <p>Não tem conta? <a href="/admin/registro.php">Criar cadastro</a></p>
+            <p style="margin-top: 0.5rem;"><a href="/admin/recuperar_senha.php">Esqueceu a senha?</a></p>
         </div>
     </div>
 </body>

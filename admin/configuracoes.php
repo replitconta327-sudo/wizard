@@ -465,7 +465,7 @@ try {
                         <td>${p.descricao || '-'}</td>
                         <td>R$ ${parseFloat(p.preco_m).toFixed(2)}</td>
                         <td>R$ ${parseFloat(p.preco_g).toFixed(2)}</td>
-                        <td><button class="btn-sm">Editar</button></td>
+                        <td><button class="btn-sm" onclick="editarItem('pizzas', ${p.id})">✏️</button> <button class="btn-sm" onclick="deletarItem('pizzas', ${p.id})" style="background: #c33;">🗑️</button></td>
                     </tr>
                 `).join('');
             } else if (aba === 'bebidas' && dados.length) {
@@ -476,7 +476,7 @@ try {
                         <td>${b.volume}</td>
                         <td>R$ ${parseFloat(b.preco).toFixed(2)}</td>
                         <td>${b.estoque}</td>
-                        <td><button class="btn-sm">Editar</button></td>
+                        <td><button class="btn-sm" onclick="editarItem('bebidas', ${b.id})">✏️</button> <button class="btn-sm" onclick="deletarItem('bebidas', ${b.id})" style="background: #c33;">🗑️</button></td>
                     </tr>
                 `).join('');
             } else if (aba === 'bairros' && dados.length) {
@@ -486,7 +486,7 @@ try {
                         <td>R$ ${parseFloat(b.taxa_entrega).toFixed(2)}</td>
                         <td>${b.tempo_estimado}min</td>
                         <td>${b.ativo ? '✓ Sim' : '✗ Não'}</td>
-                        <td><button class="btn-sm">Editar</button></td>
+                        <td><button class="btn-sm" onclick="editarItem('bairros', ${b.id})">✏️</button> <button class="btn-sm" onclick="deletarItem('bairros', ${b.id})" style="background: #c33;">🗑️</button></td>
                     </tr>
                 `).join('');
             } else if (aba === 'adicionais' && dados.length) {
@@ -495,7 +495,7 @@ try {
                         <td>${a.nome}</td>
                         <td>R$ ${parseFloat(a.preco).toFixed(2)}</td>
                         <td>${a.ativo ? '✓ Sim' : '✗ Não'}</td>
-                        <td><button class="btn-sm">Editar</button></td>
+                        <td><button class="btn-sm" onclick="editarItem('adicionais', ${a.id})">✏️</button> <button class="btn-sm" onclick="deletarItem('adicionais', ${a.id})" style="background: #c33;">🗑️</button></td>
                     </tr>
                 `).join('');
             } else if (aba === 'promocoes' && dados.length) {
@@ -506,7 +506,7 @@ try {
                         <td>R$ ${parseFloat(p.preco).toFixed(2)}</td>
                         <td>R$ ${parseFloat(p.desconto).toFixed(2)}</td>
                         <td>${p.ativo ? '✓ Sim' : '✗ Não'}</td>
-                        <td><button class="btn-sm">Editar</button></td>
+                        <td><button class="btn-sm" onclick="editarItem('promocoes', ${p.id})">✏️</button> <button class="btn-sm" onclick="deletarItem('promocoes', ${p.id})" style="background: #c33;">🗑️</button></td>
                     </tr>
                 `).join('');
             } else if (aba === 'status' && dados.length) {
@@ -515,7 +515,7 @@ try {
                         <td>${s.nome}</td>
                         <td>${s.descricao || '-'}</td>
                         <td><span style="background: ${s.cor}; color: white; padding: 0.25rem 0.5rem; border-radius: 3px;">${s.cor}</span></td>
-                        <td><button class="btn-sm">Editar</button></td>
+                        <td><button class="btn-sm" onclick="editarItem('status', ${s.id})">✏️</button></td>
                     </tr>
                 `).join('');
             }
@@ -525,6 +525,23 @@ try {
             if (table) {
                 table.innerHTML = html || `<tr><td colspan="6" style="text-align: center; padding: 2rem;">Nenhum dado encontrado</td></tr>`;
             }
+        }
+
+        function deletarItem(tabela, id) {
+            if (confirm('Tem certeza que deseja deletar?')) {
+                fetch('../api/admin_config.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: `acao=deletar&tabela=${tabela}&id=${id}`
+                }).then(r => r.json()).then(d => {
+                    alert(d.mensagem || d.erro);
+                    carregarDados(tabela);
+                });
+            }
+        }
+
+        function editarItem(tabela, id) {
+            alert('Edição será implementada na próxima versão. ID: ' + id);
         }
 
         window.addEventListener('load', () => carregarDados('pizzas'));
