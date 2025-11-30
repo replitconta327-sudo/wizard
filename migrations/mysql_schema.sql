@@ -1,5 +1,6 @@
 -- Schema MySQL para Pizzaria São Paulo
 -- Para HostGator e servidores MySQL
+-- Última atualização: 30/11/2025
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -41,7 +42,7 @@ CREATE TABLE IF NOT EXISTS tamanhos_pizza (
     ativo BOOLEAN DEFAULT TRUE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabela de produtos
+-- Tabela de produtos (pizzas)
 CREATE TABLE IF NOT EXISTS produtos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     categoria_id INT NOT NULL,
@@ -245,13 +246,22 @@ CREATE TABLE IF NOT EXISTS admin_logs (
     ip VARCHAR(45),
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_usuario (usuario_id),
-    INDEX idx_data (criado_em)
+    INDEX idx_data (criado_em),
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
--- Dados iniciais
-INSERT INTO status_pedido (id, nome, descricao, cor, ordem) VALUES
+-- ============================================================================
+-- DADOS INICIAIS
+-- ============================================================================
+
+-- Admin padrão (Telefone: 11999999999 | Senha: admin123)
+INSERT IGNORE INTO usuarios (id, nome, telefone, senha, tipo, ativo) VALUES
+(1, 'Admin', '11999999999', '$2y$10$N40781CrdfJXM8rnBwtP7.d0wL19m4VvKvU2sAXCVDfmhapb6JZ..', 'admin', 1);
+
+-- Status de Pedidos
+INSERT IGNORE INTO status_pedido (id, nome, descricao, cor, ordem) VALUES
 (1, 'Aguardando', 'Pedido aguardando confirmação', '#FFA500', 1),
 (2, 'Confirmado', 'Pedido confirmado', '#17a2b8', 2),
 (3, 'Preparando', 'Pedido em preparação', '#007BFF', 3),
@@ -315,23 +325,23 @@ INSERT INTO adicionais (nome, preco, ativo) VALUES
 ON DUPLICATE KEY UPDATE preco=VALUES(preco);
 
 INSERT INTO promocoes (nome, descricao, preco, desconto, ativo) VALUES
-('Promoção 8 Fatias', 'Americana, Mussarela, Calabresa, Milho, Calacatu, Lombo, Bauru, À Moda da Casa, Portuguesa, 2 Queijos', 54.99, 0, 1),
-('Promoção Dupla + Guaraná', 'Leve 2 pizzas por R$ 54,99 cada + Guaraná Coroa 2L grátis', 109.98, 10.00, 1),
-('Combo Promocional', '1 pizza promoção + Coca-Cola 1,5L', 60.00, 7.98, 1)
+('Promo 8 Fatias', 'Escolha 2 pizzas de qualquer categoria por um preço especial', 99.90, 15.00, 1),
+('Dupla + Guaraná', 'Leve 2 pizzas + Guaraná Coroa 2L', 109.90, 10.00, 1),
+('Combo Familiar', '1 pizza grande + 2 refrigerantes', 89.90, 5.00, 1)
 ON DUPLICATE KEY UPDATE nome=VALUES(nome);
 
-INSERT INTO produtos (categoria_id, nome, descricao, preco_p, preco_m, preco_g, preco_gg, disponivel, destaque) VALUES
-(1, 'Calabresa', 'Calabresa fatiada, cebola e orégano', 32.00, 45.00, 55.00, 65.00, 1, 1),
-(1, 'Mussarela', 'Mussarela, tomate e orégano', 30.00, 42.00, 52.00, 62.00, 1, 1),
-(1, 'Portuguesa', 'Presunto, ovo, cebola, ervilha e mussarela', 35.00, 48.00, 58.00, 68.00, 1, 0),
-(1, 'Frango Catupiry', 'Frango desfiado com catupiry', 35.00, 48.00, 58.00, 68.00, 1, 1),
-(1, 'Marguerita', 'Mussarela, tomate, manjericão e parmesão', 32.00, 45.00, 55.00, 65.00, 1, 0),
-(1, 'Pepperoni', 'Pepperoni e mussarela', 35.00, 48.00, 58.00, 68.00, 1, 0),
-(1, 'Quatro Queijos', 'Mussarela, provolone, parmesão e gorgonzola', 38.00, 52.00, 62.00, 72.00, 1, 1),
-(2, 'Camarão', 'Camarão, mussarela e catupiry', 45.00, 60.00, 75.00, 90.00, 1, 1),
-(2, 'Lombo Canadense', 'Lombo canadense, cebola caramelizada e mussarela', 42.00, 55.00, 68.00, 80.00, 1, 0),
-(2, 'Filé Mignon', 'Filé mignon, bacon e mussarela', 48.00, 65.00, 80.00, 95.00, 1, 1),
-(3, 'Chocolate', 'Chocolate ao leite com granulado', 28.00, 38.00, 48.00, 58.00, 1, 1),
-(3, 'Romeu e Julieta', 'Goiabada com queijo minas', 30.00, 40.00, 50.00, 60.00, 1, 0),
-(3, 'Banana Nevada', 'Banana, leite condensado, canela e mussarela', 30.00, 40.00, 50.00, 60.00, 1, 0)
+INSERT INTO produtos (categoria_id, nome, descricao, preco_p, preco_m, preco_g, disponivel, destaque) VALUES
+(1, 'Calabresa', 'Calabresa fatiada, cebola e orégano', 32.00, 45.00, 55.00, 1, 1),
+(1, 'Mussarela', 'Mussarela, tomate e orégano', 30.00, 42.00, 52.00, 1, 1),
+(1, 'Portuguesa', 'Presunto, ovo, cebola, ervilha e mussarela', 35.00, 48.00, 58.00, 1, 0),
+(1, 'Frango Catupiry', 'Frango desfiado com catupiry', 35.00, 48.00, 58.00, 1, 1),
+(1, 'Marguerita', 'Mussarela, tomate, manjericão e parmesão', 32.00, 45.00, 55.00, 1, 0),
+(1, 'Pepperoni', 'Pepperoni e mussarela', 35.00, 48.00, 58.00, 1, 0),
+(1, 'Quatro Queijos', 'Mussarela, provolone, parmesão e gorgonzola', 38.00, 52.00, 62.00, 1, 1),
+(2, 'Camarão', 'Camarão, mussarela e catupiry', 45.00, 60.00, 75.00, 1, 1),
+(2, 'Lombo Canadense', 'Lombo canadense, cebola caramelizada e mussarela', 42.00, 55.00, 68.00, 1, 0),
+(2, 'Filé Mignon', 'Filé mignon, bacon e mussarela', 48.00, 65.00, 80.00, 1, 1),
+(3, 'Chocolate', 'Chocolate ao leite com granulado', 28.00, 38.00, 48.00, 1, 1),
+(3, 'Romeu e Julieta', 'Goiabada com queijo minas', 30.00, 40.00, 50.00, 1, 0),
+(3, 'Banana Nevada', 'Banana, leite condensado, canela e mussarela', 30.00, 40.00, 50.00, 1, 0)
 ON DUPLICATE KEY UPDATE preco_p=VALUES(preco_p);
