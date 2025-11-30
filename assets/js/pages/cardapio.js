@@ -446,9 +446,15 @@ class CardapioApp {
                 <div>Total</div>
                 <div class="item-price">R$ ${total.toFixed(2).replace('.', ',')}</div>
             </div>
+        </div>
+        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+            <button id="btn-editar-pedido" class="btn btn-secondary" style="flex: 1;">Editar Pedido</button>
+            <button id="btn-confirmar-pedido" class="btn btn-success" style="flex: 1;">Confirmar & Enviar</button>
         </div>`;
 
         container.innerHTML = html;
+        document.getElementById('btn-editar-pedido')?.addEventListener('click', () => this.editarPedido());
+        document.getElementById('btn-confirmar-pedido')?.addEventListener('click', () => this.confirmarPedido());
     }
 
     // MÉTODOS DE SELEÇÃO
@@ -664,7 +670,11 @@ class CardapioApp {
     }
 
     // FINALIZAÇÃO
-    async finalizarPedido() {
+    editarPedido() {
+        this.showStep('tamanho');
+    }
+
+    async confirmarPedido() {
         if (!this.selectedEnderecoId) {
             this.showError('Selecione um endereço');
             this.showStep('endereco');
@@ -675,15 +685,52 @@ class CardapioApp {
             return;
         }
 
-        this.showSuccess('Pedido confirmado!');
-        setTimeout(() => {
-            this.pizzasCart = [];
-            this.selectedAddons = [];
-            this.selectedBebidas = [];
-            this.currentPizza = null;
-            sessionStorage.removeItem('cardapioState');
-            location.reload();
-        }, 2000);
+        // Prepara dados do pedido
+        const pizzasTotal = this.pizzasCart.reduce((t, p) => t + (this.getPizzaPrice(p) * p.quantidade), 0);
+        const adicionaisTotal = this.selectedAddons.reduce((t, a) => t + a.preco, 0);
+        const bebidasTotal = this.selectedBebidas.reduce((t, b) => t + (b.preco * (b.quantidade || 1)), 0);
+        const total = pizzasTotal + adicionaisTotal + bebidasTotal + (this.taxaEntrega || 0);
+
+        const payload = {
+            endereco_id: this.selectedEnderecoId,
+            forma_pagamento: this.paymentMethod,
+            taxa_entrega: this.taxaEntrega || 0,
+            subtotal: pizzasTotal + adicionaisTotal + bebidasTotal,
+            total: total,
+            pizzas: this.pizzasCart,
+            adicionais: this.selectedAddons,
+            bebidas: this.selectedBebidas
+        };
+
+        try {
+            const res = await fetch('../api/criar_pedido.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                this.showSuccess('Pedido enviado com sucesso! Número: ' + data.numero_pedido);
+                setTimeout(() => {
+                    this.pizzasCart = [];
+                    this.selectedAddons = [];
+                    this.selectedBebidas = [];
+                    this.currentPizza = null;
+                    this.selectedEnderecoId = null;
+                    sessionStorage.removeItem('cardapioState');
+                    location.href = '/';
+                }, 3000);
+            } else {
+                this.showError(data.message || 'Erro ao enviar pedido');
+            }
+        } catch (e) {
+            this.showError('Erro ao enviar pedido: ' + e.message);
+        }
+    }
+
+    async finalizarPedido() {
+        this.confirmarPedido();
     }
 
     // STATE
