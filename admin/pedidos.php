@@ -110,21 +110,36 @@ try {
 
         .menu-item {
             padding: 1rem 1.5rem;
+            padding-left: 1.5rem;
             color: #ddd;
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 0.8rem;
             cursor: pointer;
-            border-left: 3px solid transparent;
             transition: all 0.2s;
+            position: relative;
+        }
+
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: transparent;
+            transition: background 0.2s;
         }
 
         .menu-item:hover,
         .menu-item.active {
             background: #333;
             color: white;
-            border-left-color: #4CAF50;
+        }
+
+        .menu-item.active::before {
+            background: #4CAF50;
         }
 
         .sidebar-footer {
