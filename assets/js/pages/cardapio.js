@@ -126,16 +126,6 @@ class CardapioApp {
             });
         });
 
-        // CEP/Bairro - usar delegação de eventos
-        document.addEventListener('input', (e) => {
-            if (e.target.id === 'cep') {
-                this.formatarCEP(e.target);
-            }
-            if (e.target.id === 'bairro') {
-                this.buscarTaxaBairro(e.target.value);
-            }
-        });
-
         // Tabs de endereço
         document.getElementById('tab-addr-list')?.addEventListener('click', () => {
             document.getElementById('tab-addr-list').classList.add('active');
