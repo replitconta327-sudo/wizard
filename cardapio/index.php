@@ -173,11 +173,11 @@ if (session_status() === PHP_SESSION_NONE) {
                         <div class="enderecos-list"></div>
                         <div class="endereco-form hidden">
                             <div class="form-grid">
-                                <input type="text" id="cep" class="form-control" placeholder="CEP" />
+                                <input type="text" id="cep" class="form-control" placeholder="CEP" oninput="window.cardapioApp?.formatarCEP(this)" />
                                 <input type="text" id="logradouro" class="form-control" placeholder="Logradouro" />
                                 <input type="text" id="numero" class="form-control" placeholder="Número" />
                                 <input type="text" id="complemento" class="form-control" placeholder="Complemento (opcional)" />
-                                <input type="text" id="bairro" class="form-control" placeholder="Bairro" />
+                                <input type="text" id="bairro" class="form-control" placeholder="Bairro" oninput="window.cardapioApp?.buscarTaxaBairro(this.value)" />
                                 <div id="bairro-suggestions" class="autocomplete"></div>
                                 <div id="taxa-info" class="taxa-info"></div>
                             </div>

@@ -126,7 +126,15 @@ class CardapioApp {
             });
         });
 
-        // CEP - será registrado dinamicamente em renderEndereco()
+        // CEP/Bairro - usar delegação de eventos
+        document.addEventListener('input', (e) => {
+            if (e.target.id === 'cep') {
+                this.formatarCEP(e.target);
+            }
+            if (e.target.id === 'bairro') {
+                this.buscarTaxaBairro(e.target.value);
+            }
+        });
 
         // Tabs de endereço
         document.getElementById('tab-addr-list')?.addEventListener('click', () => {
@@ -413,31 +421,6 @@ class CardapioApp {
             list.innerHTML = 'Erro ao carregar endereços.';
         }
         
-        // AGORA registrar listeners de CEP/Bairro (elementos já existem)
-        this.attachAddressListeners();
-    }
-    
-    attachAddressListeners() {
-        console.log('🔧 Anexando listeners de endereço...');
-        
-        const cepInput = document.getElementById('cep');
-        if (cepInput) {
-            cepInput.addEventListener('input', (e) => {
-                console.log('📝 CEP input:', e.target.value);
-                this.formatarCEP(e.target);
-            });
-            console.log('✅ Listener CEP anexado');
-        }
-        
-        const bairroInput = document.getElementById('bairro');
-        if (bairroInput) {
-            bairroInput.addEventListener('input', (e) => {
-                console.log('📝 Bairro input:', e.target.value);
-                this.buscarTaxaBairro(e.target.value);
-            });
-            console.log('✅ Listener Bairro anexado');
-        }
-    }
 
     renderFinalizacao() {
         const container = document.querySelector('.finalizacao-content');
