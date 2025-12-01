@@ -170,6 +170,10 @@ if (session_status() === PHP_SESSION_NONE) {
                         <button class="option-tab" id="tab-addr-new">Cadastrar novo</button>
                     </div>
                     <div class="endereco-content">
+                        <div class="endereco-loader hidden">
+                            <p class="step-hint">Digite seu telefone para carregar endereços cadastrados:</p>
+                            <input type="tel" id="telefone-endereco" class="form-control" placeholder="(11) 99999-9999" oninput="window.cardapioApp?.buscarEnderecosPorTelefone(this.value)" />
+                        </div>
                         <div class="enderecos-list"></div>
                         <div class="endereco-form hidden">
                             <div class="form-grid">

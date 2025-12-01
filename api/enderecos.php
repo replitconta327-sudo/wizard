@@ -24,8 +24,10 @@ try {
 
 $action = $_GET['action'] ?? $_POST['action'] ?? 'list';
 $userId = $_SESSION['usuario_id'] ?? null;
+$telefone = $_GET['telefone'] ?? $_POST['telefone'] ?? null;
 
-if (!$userId) {
+// Se não tem usuário logado mas tem telefone, busca por telefone
+if (!$userId && !$telefone) {
     echo json_encode(['success' => false, 'msg' => 'Usuário não autenticado']);
     exit;
 }
@@ -33,6 +35,18 @@ if (!$userId) {
 try {
     switch ($action) {
         case 'list':
+            // Se buscar por telefone, primeiro encontra o usuário
+            if ($telefone && !$userId) {
+                $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE telefone = ? LIMIT 1");
+                $stmt->execute([$telefone]);
+                $user = $stmt->fetch();
+                if (!$user) {
+                    echo json_encode(['success' => false, 'data' => []]);
+                    exit;
+                }
+                $userId = $user['id'];
+            }
+            
             $stmt = $pdo->prepare("SELECT * FROM enderecos WHERE usuario_id = ? ORDER BY padrao DESC, id DESC");
             $stmt->execute([$userId]);
             $enderecos = $stmt->fetchAll();

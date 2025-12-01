@@ -376,41 +376,56 @@ class CardapioApp {
         `).join('');
     }
 
-    async renderEndereco() {
+    renderEndereco() {
+        const list = document.querySelector('.enderecos-list');
+        const loader = document.querySelector('.endereco-loader');
+        if (!list || !loader) return;
+        
+        // Mostra loader, esconde lista
+        loader.classList.remove('hidden');
+        list.innerHTML = '';
+        this.clienteTelefone = null;
+    }
+
+    async buscarEnderecosPorTelefone(telefone) {
+        if (!telefone || telefone.length < 10) return;
+        
         const list = document.querySelector('.enderecos-list');
         if (!list) return;
         list.innerHTML = 'Carregando...';
         
         try {
-            const res = await fetch('../api/enderecos.php?action=list');
+            const res = await fetch(`../api/enderecos.php?action=list&telefone=${encodeURIComponent(telefone)}`);
             const data = await res.json();
+            
             if (data.success && data.data?.length) {
+                this.clienteTelefone = telefone;
                 list.innerHTML = data.data.map(e => `
                     <label class="endereco-item">
                         <input type="radio" name="endereco" value="${e.id}" data-endereco-id="${e.id}" ${this.selectedEnderecoId === e.id ? 'checked' : ''}>
-                        <span>${e.logradouro}, ${e.numero} - ${e.bairro}</span>
+                        <span>${e.apelido} • ${e.logradouro}, ${e.numero} - ${e.bairro}</span>
                     </label>
                 `).join('');
+                
                 list.querySelectorAll('input').forEach(r => {
                     r.addEventListener('change', (e) => {
                         const enderecoId = parseInt(e.target.getAttribute('data-endereco-id'));
-                        console.log('Endereço selecionado:', enderecoId);
                         this.selectedEnderecoId = enderecoId;
                         this.saveState();
                     });
                 });
-                // Se já tem um endereço selecionado, marca como checked
+                
                 if (this.selectedEnderecoId) {
                     const radio = list.querySelector(`input[value="${this.selectedEnderecoId}"]`);
                     if (radio) radio.checked = true;
                 }
             } else {
-                list.innerHTML = 'Nenhum endereço. Preencha o formulário.';
+                list.innerHTML = 'Nenhum endereço cadastrado. Preencha o formulário abaixo.';
             }
         } catch (e) {
             list.innerHTML = 'Erro ao carregar endereços.';
         }
-        
+    }
 
     renderFinalizacao() {
         const container = document.querySelector('.finalizacao-content');
