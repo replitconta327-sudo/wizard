@@ -642,6 +642,11 @@ class CardapioApp {
             this.showError('Preencha todos os campos');
             return;
         }
+        const cepRegex = /^\d{5}-?\d{3}$/;
+        if (!cepRegex.test(cep)) {
+            this.showError('CEP inválido (formato: 12345-678)');
+            return;
+        }
 
         try {
             const res = await fetch('../api/enderecos.php?action=add', {
@@ -672,6 +677,8 @@ class CardapioApp {
     }
 
     async buscarCEP(cep) {
+        cep = String(cep).replace(/\D/g, '');
+        if (cep.length !== 8) return;
         try {
             console.log('🔍 Buscando CEP na ViaCEP:', cep);
             const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);

@@ -3,6 +3,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 require_once __DIR__ . '/../config/database.php';
 
 if (!isset($_SESSION['usuario_id'])) {
@@ -13,7 +17,9 @@ if (!isset($_SESSION['usuario_id'])) {
 try {
     $database = new Database();
     $pdo = $database->pdo();
-    $usuario_result = $pdo->query("SELECT nome FROM usuarios WHERE id = " . $_SESSION['usuario_id'])->fetch(PDO::FETCH_ASSOC);
+    $stmt = $pdo->prepare("SELECT nome FROM usuarios WHERE id = ?");
+    $stmt->execute([$_SESSION['usuario_id']]);
+    $usuario_result = $stmt->fetch(PDO::FETCH_ASSOC);
     $usuario = $usuario_result ?: ['nome' => 'Admin'];
 } catch (Exception $e) {
     $usuario = ['nome' => 'Admin'];
@@ -454,7 +460,7 @@ try {
             };
 
             if (tabelas[aba]) {
-                fetch(`../api/get_config.php?tabela=${aba}`)
+                fetch(`../api/get_config.php?tabela=${aba}`, { headers: { 'X-CSRF-Token': '<?php echo $_SESSION['csrf_token']; ?>' } })
                     .then(r => r.json())
                     .then(dados => renderizarDados(aba, dados))
                     .catch(e => console.error('Erro:', e));
@@ -537,7 +543,7 @@ try {
             if (confirm('Tem certeza que deseja deletar?')) {
                 fetch('../api/admin_config.php', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-Token': '<?php echo $_SESSION['csrf_token']; ?>'},
                     body: `acao=deletar&tabela=${tabela}&id=${id}`
                 }).then(r => r.json()).then(d => {
                     alert(d.mensagem || d.erro);

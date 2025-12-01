@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Origin: *');
-header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Cache-Control: public, max-age=300');
 
 require_once __DIR__ . '/../config/database.php';
 
@@ -36,7 +36,9 @@ try {
         ];
     }, $bairros);
     
-    echo json_encode(['success' => true, 'data' => $formatted]);
+    $response = json_encode(['success' => true, 'data' => $formatted]);
+    header('ETag: ' . md5($response));
+    echo $response;
     
 } catch (Exception $e) {
     error_log('Erro ao buscar bairros: ' . $e->getMessage());

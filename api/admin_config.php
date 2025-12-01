@@ -9,6 +9,7 @@ if (!isset($_SESSION['usuario_id'])) {
 }
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/Logger.php';
 
 try {
     $database = new Database();
@@ -18,6 +19,12 @@ try {
     $tabela = $_GET['tabela'] ?? $_POST['tabela'] ?? '';
     
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $csrfHeader = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
+        if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrfHeader)) {
+            http_response_code(403);
+            echo json_encode(['erro' => 'CSRF inválido']);
+            exit;
+        }
         if ($acao === 'atualizar') {
             if ($tabela === 'pizzas') {
                 $stmt = $pdo->prepare("UPDATE produtos SET nome = ?, descricao = ?, preco_m = ?, preco_g = ? WHERE id = ?");
@@ -39,6 +46,7 @@ try {
                 $stmt->execute([$_POST['nome'], $_POST['descricao'], $_POST['cor'], $_POST['id']]);
             }
             echo json_encode(['sucesso' => true, 'mensagem' => 'Atualizado com sucesso']);
+            Logger::info('Admin config atualizado', ['tabela' => $tabela, 'admin_id' => $_SESSION['usuario_id']]);
         } elseif ($acao === 'deletar') {
             if ($tabela === 'pizzas') {
                 $pdo->prepare("DELETE FROM produtos WHERE id = ?")->execute([$_POST['id']]);
@@ -52,6 +60,7 @@ try {
                 $pdo->prepare("DELETE FROM promocoes WHERE id = ?")->execute([$_POST['id']]);
             }
             echo json_encode(['sucesso' => true, 'mensagem' => 'Deletado com sucesso']);
+            Logger::info('Admin config deletado', ['tabela' => $tabela, 'admin_id' => $_SESSION['usuario_id']]);
         } elseif ($acao === 'criar') {
             if ($tabela === 'pizzas') {
                 $stmt = $pdo->prepare("INSERT INTO produtos (categoria_id, nome, descricao, preco_m, preco_g) VALUES (?, ?, ?, ?, ?)");
@@ -70,12 +79,14 @@ try {
                 $stmt->execute([$_POST['nome'], $_POST['descricao'], $_POST['preco'], $_POST['desconto']]);
             }
             echo json_encode(['sucesso' => true, 'mensagem' => 'Criado com sucesso']);
+            Logger::info('Admin config criado', ['tabela' => $tabela, 'admin_id' => $_SESSION['usuario_id']]);
         }
     } else {
         echo json_encode(['erro' => 'Método não permitido']);
     }
 } catch (Exception $e) {
     http_response_code(400);
+    Logger::error('Admin config error', ['error' => $e->getMessage()]);
     echo json_encode(['erro' => $e->getMessage()]);
 }
 ?>

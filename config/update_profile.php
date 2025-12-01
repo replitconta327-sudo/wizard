@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 session_start();
 
 require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/Validator.php';
 
 try {
     $database = new Database();
@@ -39,6 +40,15 @@ $password = $_POST['password'] ?? '';
 
 if (empty($name) || empty($phone) || empty($street) || empty($number) || empty($neighborhood) || empty($cep)) {
     echo json_encode(['ok' => false, 'msg' => 'Campos obrigatórios não preenchidos']);
+    exit;
+}
+
+if (!Validator::phoneNumber($phone)) {
+    echo json_encode(['ok' => false, 'msg' => 'Telefone inválido']);
+    exit;
+}
+if (!Validator::cep($cep)) {
+    echo json_encode(['ok' => false, 'msg' => 'CEP inválido']);
     exit;
 }
 

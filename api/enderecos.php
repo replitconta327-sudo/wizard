@@ -13,6 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 session_start();
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/Validator.php';
 
 try {
     $database = new Database();
@@ -66,7 +67,9 @@ try {
                 ];
             }, $enderecos);
             
-            echo json_encode(['success' => true, 'data' => $formatted]);
+            $response = json_encode(['success' => true, 'data' => $formatted]);
+            header('ETag: ' . md5($response));
+            echo $response;
             break;
             
         case 'get':
@@ -116,6 +119,10 @@ try {
             
             if (empty($logradouro) || empty($numero) || empty($bairro) || empty($cep)) {
                 echo json_encode(['success' => false, 'msg' => 'Campos obrigatórios não preenchidos']);
+                exit;
+            }
+            if (!Validator::cep($cep)) {
+                echo json_encode(['success' => false, 'msg' => 'CEP inválido']);
                 exit;
             }
             

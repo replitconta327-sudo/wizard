@@ -3,40 +3,64 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 if (isset($_SESSION['usuario_id'])) {
     header('Location: /admin/dashboard.php');
     exit;
 }
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/Validator.php';
+require_once __DIR__ . '/../config/Logger.php';
 
 $erro = '';
 $sucesso = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $telefone = $_POST['telefone'] ?? '';
-    
-    if (!$telefone) {
-        $erro = 'Telefone é obrigatório';
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        $erro = 'CSRF inválido';
     } else {
-        try {
-            $database = new Database();
-            $pdo = $database->pdo();
-            
-            $stmt = $pdo->prepare("SELECT id, nome, telefone FROM usuarios WHERE telefone = ? AND tipo = 'admin'");
-            $stmt->execute([$telefone]);
-            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            if ($usuario) {
-                $_SESSION['usuario_id'] = $usuario['id'];
-                $_SESSION['usuario_nome'] = $usuario['nome'];
-                header('Location: /admin/dashboard.php');
-                exit;
-            } else {
-                $erro = 'Telefone não encontrado (apenas admins podem acessar)';
+        $now = time();
+        $blockedUntil = $_SESSION['login_blocked_until'] ?? 0;
+        if ($blockedUntil && $now < $blockedUntil) {
+            $erro = 'Muitas tentativas. Tente novamente mais tarde.';
+        } else {
+        $telefone = $_POST['telefone'] ?? '';
+        if (!$telefone) {
+            $erro = 'Telefone é obrigatório';
+        } elseif (!Validator::phoneNumber($telefone)) {
+            $erro = 'Telefone inválido';
+        } else {
+            try {
+                $database = new Database();
+                $pdo = $database->pdo();
+                $stmt = $pdo->prepare("SELECT id, nome, telefone FROM usuarios WHERE telefone = ? AND tipo = 'admin'");
+                $stmt->execute([$telefone]);
+                    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($usuario) {
+                        $_SESSION['usuario_id'] = $usuario['id'];
+                        $_SESSION['usuario_nome'] = $usuario['nome'];
+                        Logger::info('Admin login', ['admin_id' => $usuario['id'], 'ip' => $_SERVER['REMOTE_ADDR']]);
+                        $_SESSION['login_attempts'] = 0;
+                        $_SESSION['login_blocked_until'] = 0;
+                        header('Location: /admin/dashboard.php');
+                        exit;
+                    } else {
+                        $erro = 'Telefone não encontrado (apenas admins podem acessar)';
+                        $_SESSION['login_attempts'] = ($_SESSION['login_attempts'] ?? 0) + 1;
+                        if (($_SESSION['login_attempts'] ?? 0) >= 5) {
+                            $_SESSION['login_blocked_until'] = $now + (10 * 60);
+                        }
+                        Logger::warning('Admin login failed', ['telefone' => $telefone, 'ip' => $_SERVER['REMOTE_ADDR'], 'attempts' => $_SESSION['login_attempts'] ?? 0]);
+                    }
+                } catch (Exception $e) {
+                    $erro = 'Erro ao conectar: ' . $e->getMessage();
+                    Logger::error('Admin login error', ['error' => $e->getMessage()]);
+                }
             }
-        } catch (Exception $e) {
-            $erro = 'Erro ao conectar: ' . $e->getMessage();
         }
     }
 }
@@ -208,6 +232,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
             <div class="form-group">
                 <label for="telefone">Telefone Admin</label>
                 <input type="tel" id="telefone" name="telefone" placeholder="(11) 99999-9999" required autocomplete="tel" autofocus>

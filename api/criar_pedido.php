@@ -3,6 +3,7 @@ header('Content-Type: application/json; charset=UTF-8');
 session_start();
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/Logger.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -21,6 +22,20 @@ try {
         exit;
     }
 
+    $validPayments = ['pix','card','dinheiro'];
+    if (!is_numeric($data['endereco_id']) || intval($data['endereco_id']) <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Endereço inválido']);
+        exit;
+    }
+    if (!in_array(strtolower($data['forma_pagamento']), $validPayments, true)) {
+        echo json_encode(['success' => false, 'message' => 'Forma de pagamento inválida']);
+        exit;
+    }
+    if (!is_numeric($data['total']) || floatval($data['total']) < 0) {
+        echo json_encode(['success' => false, 'message' => 'Total inválido']);
+        exit;
+    }
+
     $usuario_id = $_SESSION['usuario_id'] ?? null;
     if (!$usuario_id) {
         echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
@@ -31,9 +46,9 @@ try {
     $numero_pedido = 'PED-' . date('YmdHis') . '-' . substr(uniqid(), -6);
 
     // Prepara totais
-    $subtotal = $data['subtotal'] ?? 0;
-    $taxa_entrega = $data['taxa_entrega'] ?? 0;
-    $total = $data['total'] ?? 0;
+    $subtotal = is_numeric($data['subtotal'] ?? 0) ? floatval($data['subtotal']) : 0;
+    $taxa_entrega = is_numeric($data['taxa_entrega'] ?? 0) ? floatval($data['taxa_entrega']) : 0;
+    $total = floatval($data['total']);
 
     // Inicia transação
     $pdo->beginTransaction();
@@ -100,11 +115,13 @@ try {
         'numero_pedido' => $numero_pedido,
         'pedido_id' => $pedido_id
     ]);
+    Logger::info('Pedido criado', ['pedido_id' => $pedido_id, 'usuario_id' => $usuario_id, 'total' => $total]);
 
 } catch (Exception $e) {
     if (isset($pdo) && $pdo->inTransaction()) {
         $pdo->rollBack();
     }
     error_log('Erro ao criar pedido: ' . $e->getMessage());
+    Logger::error('Erro ao criar pedido', ['error' => $e->getMessage()]);
     echo json_encode(['success' => false, 'message' => 'Erro ao criar pedido: ' . $e->getMessage()]);
 }

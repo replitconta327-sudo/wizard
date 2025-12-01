@@ -3,49 +3,55 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 if (isset($_SESSION['usuario_id'])) {
     header('Location: /admin/dashboard.php');
     exit;
 }
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/Validator.php';
 
 $erro = '';
 $sucesso = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nome = $_POST['nome'] ?? '';
-    $telefone = $_POST['telefone'] ?? '';
-    $senha = $_POST['senha'] ?? '';
-    $confirmacao = $_POST['confirmacao'] ?? '';
-    
-    if (!$nome || !$telefone || !$senha || !$confirmacao) {
-        $erro = 'Todos os campos são obrigatórios';
-    } elseif ($senha !== $confirmacao) {
-        $erro = 'As senhas não coincidem';
-    } elseif (strlen($senha) < 6) {
-        $erro = 'A senha deve ter no mínimo 6 caracteres';
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        $erro = 'CSRF inválido';
     } else {
-        try {
-            $database = new Database();
-            $pdo = $database->pdo();
-            
-            $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE telefone = ?");
-            $stmt->execute([$telefone]);
-            $existe = $stmt->fetch();
-            
-            if ($existe) {
-                $erro = 'Este telefone já está cadastrado';
-            } else {
-                $senha_hash = password_hash($senha, PASSWORD_BCRYPT);
-                
-                $stmt = $pdo->prepare("INSERT INTO usuarios (nome, telefone, senha, tipo, ativo) VALUES (?, ?, ?, 'admin', 1)");
-                $stmt->execute([$nome, $telefone, $senha_hash]);
-                
-                $sucesso = 'Cadastro realizado com sucesso! <a href="/admin/login.php" style="color: #3c3; text-decoration: underline;">Clique aqui para fazer login</a>';
+        $nome = $_POST['nome'] ?? '';
+        $telefone = $_POST['telefone'] ?? '';
+        $senha = $_POST['senha'] ?? '';
+        $confirmacao = $_POST['confirmacao'] ?? '';
+        if (!$nome || !$telefone || !$senha || !$confirmacao) {
+            $erro = 'Todos os campos são obrigatórios';
+        } elseif ($senha !== $confirmacao) {
+            $erro = 'As senhas não coincidem';
+        } elseif (strlen($senha) < 6) {
+            $erro = 'A senha deve ter no mínimo 6 caracteres';
+        } elseif (!Validator::phoneNumber($telefone)) {
+            $erro = 'Telefone inválido';
+        } else {
+            try {
+                $database = new Database();
+                $pdo = $database->pdo();
+                $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE telefone = ?");
+                $stmt->execute([$telefone]);
+                $existe = $stmt->fetch();
+                if ($existe) {
+                    $erro = 'Este telefone já está cadastrado';
+                } else {
+                    $senha_hash = password_hash($senha, PASSWORD_BCRYPT);
+                    $stmt = $pdo->prepare("INSERT INTO usuarios (nome, telefone, senha, tipo, ativo) VALUES (?, ?, ?, 'admin', 1)");
+                    $stmt->execute([$nome, $telefone, $senha_hash]);
+                    $sucesso = 'Cadastro realizado com sucesso! <a href="/admin/login.php" style="color: #3c3; text-decoration: underline;">Clique aqui para fazer login</a>';
+                }
+            } catch (Exception $e) {
+                $erro = 'Erro ao cadastrar: ' . $e->getMessage();
             }
-        } catch (Exception $e) {
-            $erro = 'Erro ao cadastrar: ' . $e->getMessage();
         }
     }
 }
@@ -215,6 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php else: ?>
         
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
             <div class="form-group">
                 <label for="nome">Nome Completo</label>
                 <input type="text" id="nome" name="nome" placeholder="Seu nome" required>
