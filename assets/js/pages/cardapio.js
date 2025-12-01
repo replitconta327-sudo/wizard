@@ -384,6 +384,10 @@ class CardapioApp {
         const list = document.querySelector('.enderecos-list');
         if (!list) return;
         list.innerHTML = 'Carregando...';
+        
+        // Registrar eventos do CEP/Bairro AQUI (após o DOM estar pronto)
+        this.setupAddressFieldListeners();
+        
         try {
             const res = await fetch('../api/enderecos.php?action=list');
             const data = await res.json();
@@ -413,6 +417,35 @@ class CardapioApp {
         } catch (e) {
             list.innerHTML = 'Erro ao carregar endereços.';
         }
+    }
+    
+    setupAddressFieldListeners() {
+        setTimeout(() => {
+            const cepInput = document.getElementById('cep');
+            const bairroInput = document.getElementById('bairro');
+            
+            if (cepInput) {
+                console.log('✅ Adicionando listener de CEP');
+                // Remover listeners antigos se existirem
+                cepInput.removeEventListener('input', this._cepInputHandler);
+                this._cepInputHandler = (e) => {
+                    console.log('🔍 CEP digitado:', e.target.value);
+                    this.formatarCEP(e.target);
+                };
+                cepInput.addEventListener('input', this._cepInputHandler);
+            }
+            
+            if (bairroInput) {
+                console.log('✅ Adicionando listener de Bairro');
+                // Remover listeners antigos se existirem
+                bairroInput.removeEventListener('input', this._bairroInputHandler);
+                this._bairroInputHandler = (e) => {
+                    console.log('🔍 Bairro digitado:', e.target.value);
+                    this.buscarTaxaBairro(e.target.value);
+                };
+                bairroInput.addEventListener('input', this._bairroInputHandler);
+            }
+        }, 100);
     }
 
     renderFinalizacao() {
@@ -652,27 +685,35 @@ class CardapioApp {
     formatarCEP(input) {
         const v = input.value.replace(/\D/g, '');
         input.value = v.replace(/(\d{5})(\d{1,3})/, '$1-$2');
-        if (v.length === 8) this.buscarCEP(v);
+        console.log('📝 CEP formatado:', input.value, '| Dígitos:', v.length);
+        if (v.length === 8) {
+            console.log('✅ CEP completo, buscando dados...');
+            this.buscarCEP(v);
+        }
     }
 
     async buscarCEP(cep) {
         try {
-            console.log('🔍 Buscando CEP:', cep);
+            console.log('🔍 Buscando CEP na ViaCEP:', cep);
             const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
             const data = await res.json();
-            console.log('✅ Dados do ViaCEP:', data);
+            console.log('📦 Resposta ViaCEP:', data);
+            
             if (!data.erro) {
-                if (data.logradouro) {
-                    document.getElementById('logradouro').value = data.logradouro;
-                    console.log('✅ Logradouro carregado:', data.logradouro);
+                const logradouroEl = document.getElementById('logradouro');
+                const bairroEl = document.getElementById('bairro');
+                
+                if (data.logradouro && logradouroEl) {
+                    logradouroEl.value = data.logradouro;
+                    console.log('✅ Rua carregada:', data.logradouro);
                 }
-                if (data.bairro) {
-                    document.getElementById('bairro').value = data.bairro;
+                if (data.bairro && bairroEl) {
+                    bairroEl.value = data.bairro;
                     console.log('✅ Bairro carregado:', data.bairro);
                     this.buscarTaxaBairro(data.bairro);
                 }
             } else {
-                console.warn('❌ CEP não encontrado');
+                console.warn('❌ CEP não encontrado na ViaCEP');
             }
         } catch (e) {
             console.error('❌ Erro ao buscar CEP:', e);
