@@ -657,13 +657,26 @@ class CardapioApp {
 
     async buscarCEP(cep) {
         try {
+            console.log('🔍 Buscando CEP:', cep);
             const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
             const data = await res.json();
+            console.log('✅ Dados do ViaCEP:', data);
             if (!data.erro) {
-                if (data.logradouro) document.getElementById('logradouro').value = data.logradouro;
-                if (data.bairro) document.getElementById('bairro').value = data.bairro;
+                if (data.logradouro) {
+                    document.getElementById('logradouro').value = data.logradouro;
+                    console.log('✅ Logradouro carregado:', data.logradouro);
+                }
+                if (data.bairro) {
+                    document.getElementById('bairro').value = data.bairro;
+                    console.log('✅ Bairro carregado:', data.bairro);
+                    this.buscarTaxaBairro(data.bairro);
+                }
+            } else {
+                console.warn('❌ CEP não encontrado');
             }
-        } catch (e) {}
+        } catch (e) {
+            console.error('❌ Erro ao buscar CEP:', e);
+        }
     }
 
     async buscarTaxaBairro(bairro) {

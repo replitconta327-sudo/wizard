@@ -116,6 +116,24 @@ try {
             
             echo json_encode(['success' => true, 'msg' => 'Endereço cadastrado', 'id' => $newId]);
             break;
+        
+        case 'taxa':
+            $bairro = $_GET['bairro'] ?? '';
+            if (!$bairro) {
+                echo json_encode(['taxa' => 0]);
+                exit;
+            }
+            
+            $stmt = $pdo->prepare("SELECT taxa_entrega FROM bairros WHERE LOWER(nome) LIKE LOWER(?)");
+            $stmt->execute(['%' . $bairro . '%']);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($result && isset($result['taxa_entrega'])) {
+                echo json_encode(['taxa' => (float)$result['taxa_entrega']]);
+            } else {
+                echo json_encode(['taxa' => 0]);
+            }
+            break;
             
         default:
             echo json_encode(['success' => false, 'msg' => 'Ação inválida']);
