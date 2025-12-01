@@ -23,7 +23,7 @@ try {
 }
 
 $action = $_GET['action'] ?? $_POST['action'] ?? 'list';
-$userId = $_SESSION['user_id'] ?? null;
+$userId = $_SESSION['usuario_id'] ?? null;
 
 if (!$userId) {
     echo json_encode(['success' => false, 'msg' => 'Usuário não autenticado']);
@@ -89,15 +89,16 @@ try {
             break;
             
         case 'add':
-            $apelido = trim($_POST['apelido'] ?? 'Casa');
-            $logradouro = trim($_POST['logradouro'] ?? '');
-            $numero = trim($_POST['numero'] ?? '');
-            $complemento = trim($_POST['complemento'] ?? '');
-            $bairro = trim($_POST['bairro'] ?? '');
-            $cidade = trim($_POST['cidade'] ?? 'Guarapari');
-            $uf = trim($_POST['uf'] ?? 'ES');
-            $cep = preg_replace('/\D/', '', $_POST['cep'] ?? '');
-            $padrao = $_POST['padrao'] ?? 0;
+            $inputData = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+            $apelido = trim($inputData['apelido'] ?? 'Casa');
+            $logradouro = trim($inputData['logradouro'] ?? '');
+            $numero = trim($inputData['numero'] ?? '');
+            $complemento = trim($inputData['complemento'] ?? '');
+            $bairro = trim($inputData['bairro'] ?? '');
+            $cidade = trim($inputData['cidade'] ?? 'Guarapari');
+            $uf = trim($inputData['uf'] ?? 'ES');
+            $cep = preg_replace('/\D/', '', $inputData['cep'] ?? '');
+            $padrao = $inputData['padrao'] ?? 0;
             
             if (empty($logradouro) || empty($numero) || empty($bairro) || empty($cep)) {
                 echo json_encode(['success' => false, 'msg' => 'Campos obrigatórios não preenchidos']);
