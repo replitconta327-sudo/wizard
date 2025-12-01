@@ -126,9 +126,7 @@ class CardapioApp {
             });
         });
 
-        // CEP
-        document.getElementById('cep')?.addEventListener('input', (e) => this.formatarCEP(e.target));
-        document.getElementById('bairro')?.addEventListener('input', (e) => this.buscarTaxaBairro(e.target.value));
+        // CEP - será registrado dinamicamente em renderEndereco()
 
         // Tabs de endereço
         document.getElementById('tab-addr-list')?.addEventListener('click', () => {
@@ -385,9 +383,6 @@ class CardapioApp {
         if (!list) return;
         list.innerHTML = 'Carregando...';
         
-        // Registrar eventos do CEP/Bairro AQUI (após o DOM estar pronto)
-        this.setupAddressFieldListeners();
-        
         try {
             const res = await fetch('../api/enderecos.php?action=list');
             const data = await res.json();
@@ -417,35 +412,31 @@ class CardapioApp {
         } catch (e) {
             list.innerHTML = 'Erro ao carregar endereços.';
         }
+        
+        // AGORA registrar listeners de CEP/Bairro (elementos já existem)
+        this.attachAddressListeners();
     }
     
-    setupAddressFieldListeners() {
-        setTimeout(() => {
-            const cepInput = document.getElementById('cep');
-            const bairroInput = document.getElementById('bairro');
-            
-            if (cepInput) {
-                console.log('✅ Adicionando listener de CEP');
-                // Remover listeners antigos se existirem
-                cepInput.removeEventListener('input', this._cepInputHandler);
-                this._cepInputHandler = (e) => {
-                    console.log('🔍 CEP digitado:', e.target.value);
-                    this.formatarCEP(e.target);
-                };
-                cepInput.addEventListener('input', this._cepInputHandler);
-            }
-            
-            if (bairroInput) {
-                console.log('✅ Adicionando listener de Bairro');
-                // Remover listeners antigos se existirem
-                bairroInput.removeEventListener('input', this._bairroInputHandler);
-                this._bairroInputHandler = (e) => {
-                    console.log('🔍 Bairro digitado:', e.target.value);
-                    this.buscarTaxaBairro(e.target.value);
-                };
-                bairroInput.addEventListener('input', this._bairroInputHandler);
-            }
-        }, 100);
+    attachAddressListeners() {
+        console.log('🔧 Anexando listeners de endereço...');
+        
+        const cepInput = document.getElementById('cep');
+        if (cepInput) {
+            cepInput.addEventListener('input', (e) => {
+                console.log('📝 CEP input:', e.target.value);
+                this.formatarCEP(e.target);
+            });
+            console.log('✅ Listener CEP anexado');
+        }
+        
+        const bairroInput = document.getElementById('bairro');
+        if (bairroInput) {
+            bairroInput.addEventListener('input', (e) => {
+                console.log('📝 Bairro input:', e.target.value);
+                this.buscarTaxaBairro(e.target.value);
+            });
+            console.log('✅ Listener Bairro anexado');
+        }
     }
 
     renderFinalizacao() {
